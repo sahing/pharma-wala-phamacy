@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none" role="img" aria-label="Medicine placeholder">
+  <rect width="400" height="300" fill="#F3F7F5"/>
+  <circle cx="200" cy="132" r="52" fill="#E3F2EA"/>
+  <path d="M188 104h24v20h20v24h-20v20h-24v-20h-20v-24h20v-20z" fill="#0E8A50"/>
+  <text x="200" y="218" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4B5954">Pharmawala Pharmacy</text>
+  <text x="200" y="238" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#6F807A">Genuine Healthcare Product</text>
+</svg>

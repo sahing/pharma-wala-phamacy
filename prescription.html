@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Prescription | Pharmawala Pharmacy Baruipur, Kolkata</title>
+    <meta
+      name="description"
+      content="Upload your doctor's prescription photo or PDF to order genuine medicines from Pharmawala Pharmacy in Baruipur via WhatsApp or email."
+    />
+    <meta property="og:title" content="Upload Prescription | Pharmawala Pharmacy Baruipur" />
+    <meta property="og:description" content="Share a clear photo or PDF of your prescription and let our licensed pharmacist prepare your order." />
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body data-page="prescription">
+    <div id="site-header-root"></div>
+
+    <main id="main-content">
+      <section class="page-banner">
+        <div class="container">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Upload Prescription</span>
+          </nav>
+          <h1 class="section-title">Order with Your Doctor's Prescription</h1>
+          <p class="section-subtitle">
+            Prefer not to search medicines one by one? Select your prescription photo or PDF, enter your phone number, and send it straight to our Baruipur pharmacist.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top: 32px;">
+        <div class="container contact-grid">
+          <form class="form-card" id="prescription-form" novalidate>
+            <h2 style="font-size: 21px; margin-bottom: 16px;">1. Select Prescription &amp; Patient Details</h2>
+
+            <div class="dropzone" id="rx-dropzone" role="button" tabindex="0" aria-label="Upload prescription file (JPG, PNG, or PDF)">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.8" style="margin:0 auto 10px;" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <div style="font-weight: 700; font-size: 16px; color: var(--ink-primary);">Drop your prescription here or tap to browse</div>
+              <div style="font-size: 14px; color: var(--ink-muted); margin-top: 4px;">Supports JPG, PNG, or PDF · Camera photo supported on mobile</div>
+              <input type="file" id="rx-file-input" accept=".jpg,.jpeg,.png,.pdf" class="sr-only" />
+            </div>
+
+            <div id="rx-file-preview"></div>
+
+            <div class="form-grid" style="margin-top: 20px;">
+              <div class="form-field">
+                <label class="form-label" for="rx-patient-name">Patient Name *</label>
+                <input type="text" id="rx-patient-name" class="form-input" required placeholder="e.g. Tapas Roy" />
+                <span class="field-error" id="rx-err-name" role="alert"></span>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="rx-patient-phone">Mobile Number (10 digits) *</label>
+                <input type="tel" id="rx-patient-phone" class="form-input" inputmode="numeric" required placeholder="e.g. 9830012345" />
+                <span class="field-error" id="rx-err-phone" role="alert"></span>
+              </div>
+
+              <div class="form-field form-field--full">
+                <label class="form-label" for="rx-patient-notes">Medicines Needed / Delivery Address Note (Optional)</label>
+                <textarea id="rx-patient-notes" class="form-textarea" placeholder="e.g. Send 1 month supply of all listed medicines to Uttar Khodarbazar, Baruipur"></textarea>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <button type="submit" class="btn btn-primary btn-lg">Prepare Prescription Order</button>
+            </div>
+
+            <div id="rx-submit-result" hidden></div>
+          </form>
+
+          <div style="display: grid; gap: 18px;">
+            <div class="info-panel">
+              <h3>Checklist for a Valid Prescription</h3>
+              <ul style="padding-left: 18px; color: var(--ink-secondary); font-size: 15px; display: grid; gap: 8px; margin: 10px 0 0;">
+                <li>Doctor's name, registration number, and clinic details clearly visible.</li>
+                <li>Patient name and recent prescription date included.</li>
+                <li>Clear, well-lit photo with medicine names and dosages readable.</li>
+              </ul>
+            </div>
+
+            <div class="info-panel" style="background: var(--bg-subtle);">
+              <h3>Your Privacy Is Protected</h3>
+              <p>
+                Your prescription image is previewed privately inside your own browser—it is never uploaded to any third-party ad server. You share it directly with our licensed pharmacist on WhatsApp (<strong>8282082425</strong>) or email (<strong>pharmawalapharmacy@gmail.com</strong>).
+              </p>
+            </div>
+
+            <div class="info-panel" style="background: var(--color-clinic-soft); border-color: var(--color-clinic-border);">
+              <h3 style="color: var(--color-clinic-dark);">Don't have a recent prescription?</h3>
+              <p style="color: #2A4365; margin-bottom: 14px;">
+                Consult a qualified doctor at our sister vertical, <strong>Pharmawala Polyclinic</strong> in Baruipur, for an updated prescription and check-up.
+              </p>
+              <a class="btn btn-clinic btn-sm" data-config-clinic-href href="clinic.html">Visit Pharmawala Polyclinic</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer-root"></div>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

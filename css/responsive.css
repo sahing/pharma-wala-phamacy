@@ -1,0 +1,251 @@
+/* ==========================================================================
+   Pharmawala Pharmacy — Responsive Stylesheet
+   Mobile-first breakpoints, 15% mobile sticky cap compliance
+   ========================================================================== */
+
+@media (max-width: 1120px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .shop-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .nav-list {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 960px) {
+  .hero-grid,
+  .clinic-promo,
+  .pdp-grid,
+  .cart-layout,
+  .contact-grid,
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-media {
+    min-height: 260px;
+  }
+
+  .trust-grid,
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps-grid,
+  .tips-grid,
+  .testimonials-grid,
+  .service-grid,
+  .pdp-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-panel,
+  .pdp-gallery,
+  .summary-card {
+    position: static;
+  }
+
+  .header-phone {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    padding-bottom: 72px; /* Space for mobile bottom sticky bar */
+  }
+
+  .container {
+    padding-inline: 16px;
+  }
+
+  .section {
+    padding-block: 44px;
+  }
+
+  /* Slim single-row mobile sticky header (56px) + 52px bottom bar = 108px (<13% of 844px) */
+  .announcement-bar {
+    display: none;
+  }
+
+  .nav-bar {
+    display: none;
+  }
+
+  .header-main {
+    gap: 6px;
+    padding-block: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .brand-link {
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .brand-name {
+    font-size: 14.5px;
+  }
+
+  .mobile-menu-btn,
+  .mobile-search-toggle {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .cart-trigger {
+    padding: 6px 8px;
+    gap: 5px;
+    min-height: 36px;
+  }
+
+  .header-search {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    padding: 10px 16px 12px;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-hairline);
+    box-shadow: var(--shadow-card);
+  }
+
+  .header-search.is-mobile-open {
+    display: block;
+  }
+
+  .header-actions .cart-label {
+    display: none;
+  }
+
+  .hero-section {
+    padding-block: 24px 36px;
+  }
+
+  .hero-ctas .btn {
+    width: 100%;
+  }
+
+  .product-grid,
+  .shop-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .product-card-body {
+    padding: 12px;
+  }
+
+  .product-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .offer-slide {
+    padding: 24px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .clinic-promo-content {
+    padding: 24px 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .cart-item-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .floating-doctor-btn {
+    right: 12px;
+    bottom: 64px;
+    padding: 9px 13px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  /* Slim 52px bottom sticky bar on mobile (Call · WhatsApp · Cart) */
+  .mobile-bottom-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 52px;
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-hairline);
+    z-index: 950;
+    box-shadow: 0 -4px 16px rgba(15, 31, 26, 0.08);
+  }
+
+  .mobile-bottom-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-primary);
+    border-right: 1px solid var(--border-hairline);
+    min-height: 44px;
+  }
+  .mobile-bottom-item:last-child {
+    border-right: 0;
+  }
+  .mobile-bottom-item--whatsapp {
+    color: var(--color-whatsapp);
+  }
+  .mobile-bottom-item--cart {
+    background: var(--color-primary);
+    color: #FFFFFF;
+  }
+  .mobile-bottom-item svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trust-grid,
+  .category-grid,
+  .product-grid,
+  .shop-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

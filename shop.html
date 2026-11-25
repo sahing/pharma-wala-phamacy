@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop Medicines &amp; Health Products | Pharmawala Pharmacy Baruipur</title>
+    <meta
+      name="description"
+      content="Browse and filter genuine medicines, vitamins, diabetes care, baby care, Ayurveda, and healthcare devices at Pharmawala Pharmacy, Baruipur, Kolkata."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Shop Medicines &amp; Health Products | Pharmawala Pharmacy" />
+    <meta property="og:description" content="Search by medicine name, salt composition, brand, or category with doorstep delivery in Baruipur, Kolkata-700144." />
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body data-page="shop">
+    <div id="site-header-root"></div>
+
+    <main id="main-content">
+      <section class="page-banner">
+        <div class="container">
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html">Home</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Shop Medicines</span>
+          </nav>
+          <h1 class="section-title" id="shop-page-heading">All Medicines &amp; Health Products</h1>
+          <p class="section-subtitle">Search by brand or composition salt, filter by category or prescription type, and order directly for Baruipur home delivery.</p>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top: 32px;">
+        <div class="container shop-layout">
+          <aside class="filter-panel" aria-label="Filter medicines">
+            <div class="filter-header">
+              <h2 style="font-size: 17px;">Filters</h2>
+              <button type="button" id="shop-reset-filters" class="text-link" style="background:none;border:0;font-size:13px;">Reset all</button>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="shop-filter-query">Search Catalogue</label>
+              <input type="search" id="shop-filter-query" class="form-input" placeholder="Medicine, salt, brand..." />
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="shop-filter-category">Category</label>
+              <select id="shop-filter-category" class="filter-select">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label" for="shop-filter-brand">Brand / Manufacturer</label>
+              <select id="shop-filter-brand" class="filter-select">
+                <option value="">All Brands</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Prescription Type</span>
+              <div class="segmented-control" role="group" aria-label="Filter by prescription requirement">
+                <button type="button" class="segmented-btn" data-rx-filter="all" aria-pressed="true">All</button>
+                <button type="button" class="segmented-btn" data-rx-filter="otc" aria-pressed="false">OTC</button>
+                <button type="button" class="segmented-btn" data-rx-filter="rx" aria-pressed="false">Rx Only</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Price Range (₹)</span>
+              <div class="price-range-inputs">
+                <input type="number" id="shop-filter-min" class="form-input" min="0" placeholder="Min" aria-label="Minimum price in rupees" />
+                <input type="number" id="shop-filter-max" class="form-input" min="0" placeholder="Max" aria-label="Maximum price in rupees" />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="checkbox-row">
+                <input type="checkbox" id="shop-filter-stock" />
+                <span>Show in-stock items only</span>
+              </label>
+            </div>
+          </aside>
+
+          <div>
+            <div class="shop-toolbar">
+              <div class="shop-results-count tabular-nums" id="shop-results-count">Loading products...</div>
+              <div class="shop-sort-wrap">
+                <label for="shop-sort" style="font-size:14px;color:var(--ink-secondary);white-space:nowrap;">Sort by:</label>
+                <select id="shop-sort" class="filter-select" style="width:auto;min-width:190px;">
+                  <option value="relevance">Relevance</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="discount-desc">Highest Discount</option>
+                  <option value="name-asc">Name: A to Z</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="product-grid shop-grid-3" id="shop-products-grid"></div>
+            <div class="pagination-bar" id="shop-pagination" aria-label="Pagination"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer-root"></div>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
