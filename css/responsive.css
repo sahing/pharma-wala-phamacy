@@ -1,9 +1,15 @@
 /* ==========================================================================
    Pharmawala Pharmacy — Responsive Stylesheet
-   Mobile-first breakpoints, 15% mobile sticky cap compliance
+   Mobile-first breakpoints, slim single-row header & mobile action bar
    ========================================================================== */
 
-@media (max-width: 1120px) {
+@media (max-width: 1180px) {
+  .nav-list--inline {
+    gap: 16px;
+  }
+  .header-phone {
+    display: none;
+  }
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -13,23 +19,34 @@
   .footer-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .nav-list {
-    gap: 18px;
-  }
 }
 
 @media (max-width: 960px) {
-  .hero-grid,
-  .clinic-promo,
-  .pdp-grid,
-  .cart-layout,
-  .contact-grid,
-  .shop-layout {
-    grid-template-columns: 1fr;
+  .nav-inline {
+    display: none;
   }
 
-  .hero-media {
-    min-height: 260px;
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  .hero-slide {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+    gap: 24px;
+  }
+
+  .hero-slide-media {
+    min-height: 240px;
+    max-height: 300px;
+  }
+
+  .clinic-promo,
+  .pdp-grid,
+  .contact-grid,
+  .shop-layout,
+  .visit-card {
+    grid-template-columns: 1fr;
   }
 
   .trust-grid,
@@ -41,18 +58,14 @@
   .tips-grid,
   .testimonials-grid,
   .service-grid,
-  .pdp-details-grid {
+  .pdp-details-grid,
+  .visit-timings-grid {
     grid-template-columns: 1fr;
   }
 
   .filter-panel,
-  .pdp-gallery,
-  .summary-card {
+  .pdp-gallery {
     position: static;
-  }
-
-  .header-phone {
-    display: none;
   }
 }
 
@@ -70,76 +83,59 @@
     padding-block: 44px;
   }
 
-  /* Slim single-row mobile sticky header (56px) + 52px bottom bar = 108px (<13% of 844px) */
   .announcement-bar {
     display: none;
   }
 
-  .nav-bar {
-    display: none;
-  }
-
-  .header-main {
-    gap: 6px;
-    padding-block: 8px;
-    flex-wrap: nowrap;
+  .header-main--single {
+    gap: 10px;
+    padding-block: 10px;
   }
 
   .brand-link {
-    gap: 7px;
+    gap: 8px;
     min-width: 0;
   }
 
   .brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
   }
 
   .brand-name {
-    font-size: 14.5px;
+    font-size: 15.5px;
   }
 
-  .mobile-menu-btn,
-  .mobile-search-toggle {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-  }
-
-  .header-actions {
-    gap: 6px;
-  }
-
-  .cart-trigger {
-    padding: 6px 8px;
-    gap: 5px;
-    min-height: 36px;
-  }
-
-  .header-search {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    max-width: 100%;
-    padding: 10px 16px 12px;
-    background: #FFFFFF;
-    border-bottom: 1px solid var(--border-hairline);
-    box-shadow: var(--shadow-card);
-  }
-
-  .header-search.is-mobile-open {
-    display: block;
-  }
-
-  .header-actions .cart-label {
+  .brand-sub {
     display: none;
   }
 
-  .hero-section {
-    padding-block: 24px 36px;
+  .header-wa-cta span {
+    display: none;
+  }
+
+  .header-wa-cta {
+    padding: 8px 10px;
+    min-height: 38px;
+  }
+
+  .mobile-menu-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .hero-banner-section {
+    padding-block: 18px 28px;
+  }
+
+  .hero-slide {
+    padding: 22px 18px;
+    gap: 18px;
+  }
+
+  .hero-slide-media {
+    min-height: 200px;
   }
 
   .hero-ctas .btn {
@@ -161,29 +157,17 @@
     align-items: stretch;
   }
 
-  .offer-slide {
-    padding: 24px 20px;
-    flex-direction: column;
-    align-items: flex-start;
+  .product-wa-btn {
+    justify-content: center;
   }
 
-  .clinic-promo-content {
-    padding: 24px 20px;
+  .clinic-promo-content,
+  .visit-card-main {
+    padding: 22px 18px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-  }
-
-  .cart-item {
-    grid-template-columns: 72px 1fr;
-  }
-
-  .cart-item-actions {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
 
   .footer-grid {
@@ -199,7 +183,7 @@
     border-radius: 12px;
   }
 
-  /* Slim 52px bottom sticky bar on mobile (Call · WhatsApp · Cart) */
+  /* Slim 52px bottom sticky bar on mobile (Call · WhatsApp · Upload Rx) */
   .mobile-bottom-bar {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -231,7 +215,7 @@
   .mobile-bottom-item--whatsapp {
     color: var(--color-whatsapp);
   }
-  .mobile-bottom-item--cart {
+  .mobile-bottom-item--primary {
     background: var(--color-primary);
     color: #FFFFFF;
   }

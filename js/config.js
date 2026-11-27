@@ -73,3 +73,39 @@ export function buildMailtoUrl(email, subject, body) {
   const query = params.toString();
   return `mailto:${email}${query ? `?${query}` : ''}`;
 }
+
+export function buildProductWhatsAppUrl(product) {
+  if (!product) {
+    return buildWhatsAppUrl(`Hello ${CONFIG.BRAND_NAME}, I would like to enquire about medicines.`);
+  }
+  const pack = product.pack_size ? ` (${product.pack_size})` : '';
+  const priceText = product.price ? ` — ${CONFIG.CURRENCY_SYMBOL}${Number(product.price).toLocaleString('en-IN')}` : '';
+  const action = product.in_stock === false
+    ? 'is this currently back in stock or available on request?'
+    : 'please confirm availability for home delivery / store pickup.';
+  const rxNote = product.prescription_required ? ' (I have a valid prescription ready.)' : '';
+  return buildWhatsAppUrl(
+    `Hello ${CONFIG.BRAND_NAME}, I would like to order ${product.name}${pack}${priceText} — ${action}${rxNote}`
+  );
+}
+
+/**
+ * Checks if the pharmacy is open during daily store hours (8:00 AM – 10:30 PM IST).
+ */
+export function isStoreOpenNow(date = new Date()) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(date);
+    const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
+    const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
+    const minutes = hour * 60 + minute;
+    return minutes >= 8 * 60 && minutes <= 22 * 60 + 30;
+  } catch {
+    const minutes = date.getHours() * 60 + date.getMinutes();
+    return minutes >= 8 * 60 && minutes <= 22 * 60 + 30;
+  }
+}

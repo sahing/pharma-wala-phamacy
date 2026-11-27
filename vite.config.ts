@@ -6,8 +6,6 @@ const htmlPages = {
   main: path.resolve(__dirname, 'index.html'),
   shop: path.resolve(__dirname, 'shop.html'),
   product: path.resolve(__dirname, 'product.html'),
-  cart: path.resolve(__dirname, 'cart.html'),
-  checkout: path.resolve(__dirname, 'checkout.html'),
   prescription: path.resolve(__dirname, 'prescription.html'),
   clinic: path.resolve(__dirname, 'clinic.html'),
   about: path.resolve(__dirname, 'about.html'),

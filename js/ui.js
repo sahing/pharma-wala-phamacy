@@ -1,25 +1,24 @@
 /**
  * Pharmawala Pharmacy — Shared UI Components & Chrome
- * Renders consistent sticky header, categories mega-menu, footer,
- * product cards, skeleton loaders, mobile sticky bar, carousel, FAQ & toasts.
+ * Renders slim single-row sticky header, categories mega-menu, footer,
+ * WhatsApp-first product cards, skeleton loaders, mobile sticky bar,
+ * enhanced sliding banner carousel, FAQ & toasts.
  */
 
 import {
   CONFIG,
   buildMailtoUrl,
+  buildProductWhatsAppUrl,
   buildTelUrl,
   buildWhatsAppUrl,
+  isStoreOpenNow,
   resolveHref,
 } from './config.js';
-import { addToCart, calculateCartSummary, getCart } from './cart.js';
 import { extractCategories, formatINR } from './products.js';
-import { initSearchWidget } from './search.js';
 
 export const ICONS = {
   cross: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
-  search: `<svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
   phone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
-  cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3h3l2.4 11.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.5L22 7H6.5"/></svg>`,
   whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
   menu: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`,
   close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
@@ -36,6 +35,8 @@ export const ICONS = {
   heart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
   shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
   bandage: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M10 10h.01M14 14h.01M14 10h.01M10 14h.01"/></svg>`,
+  mapPin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
 };
 
 export function getCategoryIcon(categoryName) {
@@ -76,18 +77,6 @@ export function showToast(message) {
   }, 2800);
 }
 
-export function updateCartBadges(animate = false) {
-  const { itemCount } = calculateCartSummary(getCart());
-  document.querySelectorAll('[data-cart-count]').forEach((badge) => {
-    badge.textContent = String(itemCount);
-    if (animate) {
-      badge.classList.remove('is-bouncing');
-      void badge.offsetWidth;
-      badge.classList.add('is-bouncing');
-    }
-  });
-}
-
 export function renderHeader(activePage = '') {
   const target = document.getElementById('site-header-root');
   if (!target) return;
@@ -95,13 +84,19 @@ export function renderHeader(activePage = '') {
   const isClinic = activePage === 'clinic';
   const clinicHref = resolveHref(CONFIG.CLINIC_URL);
   const clinicTargetAttr = /^https?:/i.test(CONFIG.CLINIC_URL) ? ' target="_blank" rel="noopener noreferrer"' : '';
+  const openNow = isStoreOpenNow();
 
   target.innerHTML = `
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="announcement-bar">
       <div class="container announcement-inner">
         <div class="announcement-text">
-          <span>Free home delivery in Baruipur on orders above ${formatINR(CONFIG.FREE_DELIVERY_THRESHOLD)}</span>
+          <span class="store-status-pill ${openNow ? 'is-open' : 'is-closed'}" data-store-status>
+            <span class="status-dot" aria-hidden="true"></span>
+            ${openNow ? 'Open Now' : 'Closed Now'}
+          </span>
+          <span class="announcement-sep" aria-hidden="true">|</span>
+          <span>Free home delivery in Baruipur above ${formatINR(CONFIG.FREE_DELIVERY_THRESHOLD)}</span>
           <span class="announcement-sep" aria-hidden="true">|</span>
           <span>${escapeHtml(isClinic ? CONFIG.CLINIC_TIMINGS : CONFIG.STORE_TIMINGS)}</span>
         </div>
@@ -113,57 +108,22 @@ export function renderHeader(activePage = '') {
     </div>
 
     <header class="site-header" role="banner">
-      <div class="container header-main">
+      <div class="container header-main header-main--single">
         <a class="brand-link" href="${resolveHref(isClinic ? 'clinic.html' : 'index.html')}" aria-label="${escapeHtml(isClinic ? CONFIG.CLINIC_NAME : CONFIG.BRAND_NAME)} Home">
           <span class="brand-mark">${isClinic ? ICONS.stethoscope : ICONS.cross}</span>
-          <span class="brand-name">${escapeHtml(isClinic ? CONFIG.CLINIC_NAME : CONFIG.BRAND_NAME)}</span>
+          <span class="brand-text">
+            <span class="brand-name">${escapeHtml(isClinic ? CONFIG.CLINIC_NAME : CONFIG.BRAND_NAME)}</span>
+            <span class="brand-sub">Baruipur · Kolkata-700144</span>
+          </span>
         </a>
 
-        <div class="header-search" id="header-search-box" data-search-widget>
-          <form class="search-form" data-search-form role="search" aria-label="Search medicines and healthcare products">
-            ${ICONS.search}
-            <input
-              type="search"
-              class="search-input"
-              data-search-input
-              placeholder="Search medicines, salts (e.g. Paracetamol), brands..."
-              autocomplete="off"
-              aria-label="Search medicines, salts, or brands"
-              aria-expanded="false"
-              aria-controls="header-search-results"
-            />
-            <button type="submit" class="search-submit">Search</button>
-          </form>
-          <div id="header-search-results" class="search-dropdown" data-search-dropdown role="listbox"></div>
-        </div>
-
-        <div class="header-actions">
-          <button type="button" class="mobile-search-toggle" id="toggle-mobile-search" aria-label="Search medicines" aria-expanded="false" aria-controls="header-search-box">
-            ${ICONS.search}
-          </button>
-          <a class="header-phone" href="${buildTelUrl()}" aria-label="Call Pharmawala Pharmacy at ${CONFIG.PHONE_RAW}">
-            ${ICONS.phone}
-            <span class="tabular-nums">${CONFIG.PHONE_RAW}</span>
-          </a>
-          <a class="cart-trigger" href="${resolveHref('cart.html')}" aria-label="View shopping cart">
-            ${ICONS.cart}
-            <span class="cart-label">Cart</span>
-            <span class="cart-count tabular-nums" data-cart-count>0</span>
-          </a>
-          <button type="button" class="mobile-menu-btn" id="open-mobile-drawer" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav-drawer">
-            ${ICONS.menu}
-          </button>
-        </div>
-      </div>
-
-      <nav class="nav-bar" aria-label="Primary navigation">
-        <div class="container">
-          <ul class="nav-list">
+        <nav class="nav-inline" aria-label="Primary navigation">
+          <ul class="nav-list nav-list--inline">
             <li class="nav-item">
               <a class="nav-link ${activePage === 'home' ? 'is-active' : ''}" href="${resolveHref('index.html')}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link ${activePage === 'shop' ? 'is-active' : ''}" href="${resolveHref('shop.html')}">Shop</a>
+              <a class="nav-link ${activePage === 'shop' ? 'is-active' : ''}" href="${resolveHref('shop.html')}">Catalogue</a>
             </li>
             <li class="nav-item" id="categories-mega-item">
               <button type="button" class="nav-link mega-trigger" id="categories-mega-btn" aria-label="Categories" aria-expanded="false" aria-controls="categories-mega-menu">
@@ -180,12 +140,12 @@ export function renderHeader(activePage = '') {
               </div>
             </li>
             <li class="nav-item">
-              <a class="nav-link ${activePage === 'prescription' ? 'is-active' : ''}" href="${resolveHref('prescription.html')}">Upload Prescription</a>
+              <a class="nav-link ${activePage === 'prescription' ? 'is-active' : ''}" href="${resolveHref('prescription.html')}">Upload Rx</a>
             </li>
             <li class="nav-item">
               <a class="nav-link nav-link-clinic ${activePage === 'clinic' ? 'is-active' : ''}" href="${clinicHref}"${clinicTargetAttr}>
-                ${escapeHtml(CONFIG.CLINIC_NAME)}
-                <span class="sister-tag">Sister Vertical</span>
+                Polyclinic
+                <span class="sister-tag">Clinic</span>
               </a>
             </li>
             <li class="nav-item">
@@ -195,8 +155,27 @@ export function renderHeader(activePage = '') {
               <a class="nav-link ${activePage === 'contact' ? 'is-active' : ''}" href="${resolveHref('contact.html')}">Contact</a>
             </li>
           </ul>
+        </nav>
+
+        <div class="header-actions">
+          <a class="header-phone" href="${buildTelUrl()}" aria-label="Call Pharmawala Pharmacy at ${CONFIG.PHONE_RAW}">
+            ${ICONS.phone}
+            <span class="tabular-nums">${CONFIG.PHONE_RAW}</span>
+          </a>
+          <a
+            class="header-wa-cta"
+            href="${buildWhatsAppUrl(`Hello ${CONFIG.BRAND_NAME}, I would like to order medicines or enquire about availability.`)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ${ICONS.whatsapp}
+            <span>WhatsApp Order</span>
+          </a>
+          <button type="button" class="mobile-menu-btn" id="open-mobile-drawer" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav-drawer">
+            ${ICONS.menu}
+          </button>
         </div>
-      </nav>
+      </div>
     </header>
 
     <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
@@ -209,13 +188,12 @@ export function renderHeader(activePage = '') {
       </div>
       <nav class="mobile-nav-links">
         <a href="${resolveHref('index.html')}" class="${activePage === 'home' ? 'is-active' : ''}">Home</a>
-        <a href="${resolveHref('shop.html')}" class="${activePage === 'shop' ? 'is-active' : ''}">Shop Medicines</a>
+        <a href="${resolveHref('shop.html')}" class="${activePage === 'shop' ? 'is-active' : ''}">Medicine Catalogue</a>
         <a href="${resolveHref('prescription.html')}" class="${activePage === 'prescription' ? 'is-active' : ''}">Upload Prescription</a>
         <a href="${clinicHref}"${clinicTargetAttr} class="${activePage === 'clinic' ? 'is-active' : ''}">
           <span>${escapeHtml(CONFIG.CLINIC_NAME)}</span>
           <span class="sister-tag">Sister Vertical</span>
         </a>
-        <a href="${resolveHref('cart.html')}" class="${activePage === 'cart' ? 'is-active' : ''}">My Cart</a>
         <a href="${resolveHref('about.html')}" class="${activePage === 'about' ? 'is-active' : ''}">About Us</a>
         <a href="${resolveHref('contact.html')}" class="${activePage === 'contact' ? 'is-active' : ''}">Contact &amp; Location</a>
       </nav>
@@ -235,19 +213,17 @@ export function renderHeader(activePage = '') {
         ${ICONS.whatsapp}
         <span>WhatsApp</span>
       </a>
-      <a class="mobile-bottom-item mobile-bottom-item--cart" href="${resolveHref('cart.html')}">
-        ${ICONS.cart}
-        <span>Cart (<span data-cart-count>0</span>)</span>
+      <a class="mobile-bottom-item mobile-bottom-item--primary" href="${resolveHref('prescription.html')}">
+        ${ICONS.upload}
+        <span>Upload Rx</span>
       </a>
     </nav>
   `;
 
-  // Wire header search widget
-  initSearchWidget(target.querySelector('[data-search-widget]'));
-
   // Wire Categories Mega Menu
   const megaItem = document.getElementById('categories-mega-item');
   const megaBtn = document.getElementById('categories-mega-btn');
+
   if (megaItem && megaBtn) {
     megaBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -264,19 +240,6 @@ export function renderHeader(activePage = '') {
       if (e.key === 'Escape') {
         megaItem.classList.remove('is-open');
         megaBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  // Wire Mobile Search Toggle
-  const mobileSearchBtn = document.getElementById('toggle-mobile-search');
-  const headerSearchBox = document.getElementById('header-search-box');
-  if (mobileSearchBtn && headerSearchBox) {
-    mobileSearchBtn.addEventListener('click', () => {
-      const isOpen = headerSearchBox.classList.toggle('is-mobile-open');
-      mobileSearchBtn.setAttribute('aria-expanded', String(isOpen));
-      if (isOpen) {
-        headerSearchBox.querySelector('input')?.focus();
       }
     });
   }
@@ -298,8 +261,6 @@ export function renderHeader(activePage = '') {
   openBtn?.addEventListener('click', () => setDrawer(true));
   closeBtn?.addEventListener('click', () => setDrawer(false));
   backdrop?.addEventListener('click', () => setDrawer(false));
-
-  updateCartBadges(false);
 }
 
 export function populateMegaMenuCategories(products) {
@@ -348,9 +309,9 @@ export function renderFooter() {
             <h2 class="footer-heading">Pharmacy Quick Links</h2>
             <ul class="footer-links">
               <li><a href="${resolveHref('index.html')}">Home</a></li>
-              <li><a href="${resolveHref('shop.html')}">All Medicines &amp; Products</a></li>
+              <li><a href="${resolveHref('shop.html')}">Medicines &amp; Health Catalogue</a></li>
               <li><a href="${resolveHref('prescription.html')}">Upload Prescription</a></li>
-              <li><a href="${resolveHref('cart.html')}">Shopping Cart</a></li>
+              <li><a href="${buildWhatsAppUrl(`Hello ${CONFIG.BRAND_NAME}, I would like to order medicines.`)}" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a></li>
               <li><a href="${resolveHref('about.html')}">About Pharmawala</a></li>
               <li><a href="${resolveHref('contact.html')}">Contact &amp; Directions</a></li>
             </ul>
@@ -432,6 +393,7 @@ export function renderProductCard(product) {
   const imgUrl = resolveHref(product.image);
   const placeholderUrl = resolveHref('images/placeholder.svg');
   const metaText = [product.brand, product.pack_size].filter(Boolean).join(' · ');
+  const waUrl = buildProductWhatsAppUrl(product);
 
   return `
     <article class="product-card" data-product-id="${escapeHtml(product.id)}">
@@ -443,7 +405,15 @@ export function renderProductCard(product) {
           referrerpolicy="no-referrer"
           onerror="this.onerror=null;this.src='${placeholderUrl}';"
         />
-        ${product.prescription_required ? '<span class="product-rx-flag" title="Valid doctor prescription required">Rx Required</span>' : ''}
+        <span class="product-badge-row">
+          ${
+            product.prescription_required
+              ? '<span class="product-rx-flag" title="Valid doctor prescription required">Rx Required</span>'
+              : '<span class="product-otc-flag">OTC</span>'
+          }
+          ${product.discount > 0 ? `<span class="product-discount-pill tabular-nums">${product.discount}% OFF</span>` : ''}
+        </span>
+        <span class="product-cat-pill">${escapeHtml(product.category)}</span>
       </a>
       <div class="product-card-body">
         ${metaText ? `<div class="product-card-meta">${escapeHtml(metaText)}</div>` : ''}
@@ -457,45 +427,24 @@ export function renderProductCard(product) {
               <span class="price-current">${formatINR(product.price)}</span>
               ${product.mrp > product.price ? `<span class="price-mrp">${formatINR(product.mrp)}</span>` : ''}
             </div>
-            ${product.discount > 0 ? `<span class="price-discount tabular-nums">${product.discount}% off</span>` : ''}
+            <span class="stock-status ${product.in_stock ? 'is-in-stock' : 'is-out'}">
+              ${product.in_stock ? 'In Stock' : 'Out of stock'}
+            </span>
           </div>
-          ${
-            product.in_stock
-              ? `<button
-                  type="button"
-                  class="btn btn-soft btn-sm"
-                  data-add-to-cart="${escapeHtml(product.id)}"
-                  aria-label="Add ${escapeHtml(product.name)} to cart"
-                >Add to Cart</button>`
-              : `<span class="out-of-stock-label">Out of stock</span>`
-          }
+          <a
+            class="btn btn-whatsapp-soft btn-sm product-wa-btn"
+            href="${waUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="${product.in_stock ? 'Order' : 'Enquire about'} ${escapeHtml(product.name)} on WhatsApp"
+          >
+            ${ICONS.whatsapp}
+            <span>${product.in_stock ? 'Order' : 'Enquire'}</span>
+          </a>
         </div>
       </div>
     </article>
   `;
-}
-
-export function bindAddToCartButtons(rootEl, products) {
-  if (!rootEl) return;
-  const byId = new Map(products.map((p) => [p.id, p]));
-  rootEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-add-to-cart]');
-    if (!btn) return;
-    const id = btn.getAttribute('data-add-to-cart');
-    const product = byId.get(id);
-    if (!product || !product.in_stock) return;
-
-    addToCart(product, 1);
-    updateCartBadges(true);
-    showToast(`Added "${product.name}" to cart`);
-    const original = btn.textContent;
-    btn.textContent = 'Added';
-    btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = original;
-      btn.disabled = false;
-    }, 900);
-  });
 }
 
 export function initScrollReveal() {
@@ -541,29 +490,38 @@ export function initAccordions() {
   });
 }
 
-export function initCarousel(carouselId) {
+export function initCarousel(carouselId, { intervalMs = 5200, slideSelector = '[data-carousel-slide]' } = {}) {
   const root = document.getElementById(carouselId);
   if (!root) return;
   const track = root.querySelector('[data-carousel-track]');
-  const slides = Array.from(root.querySelectorAll('.offer-slide'));
+  const slides = Array.from(root.querySelectorAll(slideSelector));
   const dots = Array.from(root.querySelectorAll('.carousel-dot'));
   const prevBtn = root.querySelector('[data-carousel-prev]');
   const nextBtn = root.querySelector('[data-carousel-next]');
+  const counterEl = root.querySelector('[data-carousel-counter]');
   if (!track || slides.length <= 1) return;
 
   let index = 0;
   let timer = null;
+  let touchStartX = 0;
 
   const goTo = (nextIdx) => {
     index = (nextIdx + slides.length) % slides.length;
     track.style.transform = `translateX(-${index * 100}%)`;
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('is-active', i === index);
+      slide.setAttribute('aria-hidden', String(i !== index));
+    });
     dots.forEach((dot, i) => dot.setAttribute('aria-selected', String(i === index)));
+    if (counterEl) {
+      counterEl.textContent = `${index + 1} / ${slides.length}`;
+    }
   };
 
   const startAuto = () => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     stopAuto();
-    timer = setInterval(() => goTo(index + 1), 5500);
+    timer = setInterval(() => goTo(index + 1), intervalMs);
   };
 
   const stopAuto = () => {
@@ -586,7 +544,43 @@ export function initCarousel(carouselId) {
     });
   });
 
+  root.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      goTo(index - 1);
+      startAuto();
+    } else if (e.key === 'ArrowRight') {
+      goTo(index + 1);
+      startAuto();
+    }
+  });
+
+  root.addEventListener(
+    'touchstart',
+    (e) => {
+      touchStartX = e.changedTouches[0]?.clientX ?? 0;
+      stopAuto();
+    },
+    { passive: true }
+  );
+
+  root.addEventListener(
+    'touchend',
+    (e) => {
+      const touchEndX = e.changedTouches[0]?.clientX ?? 0;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 40) {
+        goTo(diff > 0 ? index + 1 : index - 1);
+      }
+      startAuto();
+    },
+    { passive: true }
+  );
+
   root.addEventListener('mouseenter', stopAuto);
   root.addEventListener('mouseleave', startAuto);
+  root.addEventListener('focusin', stopAuto);
+  root.addEventListener('focusout', startAuto);
+
+  goTo(0);
   startAuto();
 }

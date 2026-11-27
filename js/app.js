@@ -1,26 +1,18 @@
 /**
  * Pharmawala Pharmacy — Main Page Controller & Router
- * Initializes shared header/footer/search and page-specific interactive flows.
+ * Initializes shared header/footer, sliding banners, visual category tabs,
+ * and WhatsApp / Prescription / Polyclinic flows (no cart, no search).
  */
 
 import {
   CONFIG,
   buildMailtoUrl,
+  buildProductWhatsAppUrl,
   buildTelUrl,
   buildWhatsAppUrl,
+  isStoreOpenNow,
   resolveHref,
 } from './config.js';
-import {
-  addToCart,
-  calculateCartSummary,
-  clearCart,
-  generateOrderRef,
-  getCart,
-  getWhatsAppOrderUrl,
-  removeFromCart,
-  updateQuantity,
-  validateCheckoutForm,
-} from './cart.js';
 import {
   extractBrands,
   extractCategories,
@@ -31,9 +23,8 @@ import {
   paginateProducts,
   sortProducts,
 } from './products.js';
-import { debounce, initSearchWidget } from './search.js';
 import {
-  bindAddToCartButtons,
+  ICONS,
   escapeHtml,
   getCategoryIcon,
   initAccordions,
@@ -46,7 +37,6 @@ import {
   renderProductCard,
   renderSkeletonGrid,
   showToast,
-  updateCartBadges,
 } from './ui.js';
 
 function hydrateConfigBindings() {
@@ -63,19 +53,46 @@ function hydrateConfigBindings() {
   document.querySelectorAll('[data-config-map]').forEach((el) => {
     el.setAttribute('src', CONFIG.MAP_EMBED_URL);
   });
+
+  const openNow = isStoreOpenNow();
+  document.querySelectorAll('[data-store-status-card]').forEach((el) => {
+    el.classList.toggle('is-open', openNow);
+    el.classList.toggle('is-closed', !openNow);
+    el.innerHTML = `<span class="status-dot" aria-hidden="true"></span>${openNow ? 'Store Open Now · Until 10:30 PM' : 'Currently Closed · Opens 8:00 AM'}`;
+  });
+}
+
+function interleaveByImage(pool, limit = 8) {
+  const buckets = new Map();
+  pool.forEach((p) => {
+    const key = p.image || 'default';
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(p);
+  });
+  const interleaved = [];
+  const lists = Array.from(buckets.values());
+  let added = true;
+  while (interleaved.length < limit && added) {
+    added = false;
+    for (const list of lists) {
+      if (list.length && interleaved.length < limit) {
+        interleaved.push(list.shift());
+        added = true;
+      }
+    }
+  }
+  return interleaved;
 }
 
 /* ==========================================================================
    HOME PAGE CONTROLLER
    ========================================================================== */
 async function initHomePage() {
-  const heroSearch = document.getElementById('hero-search-widget');
-  if (heroSearch) initSearchWidget(heroSearch);
-
-  initCarousel('offers-carousel');
+  initCarousel('hero-banner-carousel', { intervalMs: 5500 });
   initAccordions();
 
   const catGrid = document.getElementById('home-categories-grid');
+  const featuredTabs = document.getElementById('home-featured-tabs');
   const featuredGrid = document.getElementById('home-featured-grid');
 
   if (featuredGrid) {
@@ -86,9 +103,11 @@ async function initHomePage() {
     const products = await loadProducts();
     populateMegaMenuCategories(products);
 
+    const categories = extractCategories(products);
+
     if (catGrid) {
-      const categories = extractCategories(products).slice(0, 8);
       catGrid.innerHTML = categories
+        .slice(0, 8)
         .map(
           (cat) => `
         <a class="category-card" href="${resolveHref(`shop.html?category=${encodeURIComponent(cat.name)}`)}">
@@ -103,29 +122,39 @@ async function initHomePage() {
     }
 
     if (featuredGrid) {
-      const featured = products.filter((p) => p.featured && p.in_stock);
-      const pool = featured.length >= 4 ? featured : products.filter((p) => p.in_stock);
-      // Interleave by image asset so adjacent cards show varied studio photography
-      const buckets = new Map();
-      pool.forEach((p) => {
-        const key = p.image || 'default';
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(p);
-      });
-      const interleaved = [];
-      const lists = Array.from(buckets.values());
-      let added = true;
-      while (interleaved.length < 8 && added) {
-        added = false;
-        for (const list of lists) {
-          if (list.length && interleaved.length < 8) {
-            interleaved.push(list.shift());
-            added = true;
-          }
-        }
+      const renderFeaturedByCategory = (activeCat = '') => {
+        const filtered = activeCat
+          ? products.filter((p) => p.category === activeCat && p.in_stock)
+          : products.filter((p) => p.featured && p.in_stock);
+        const pool = filtered.length >= 4 || activeCat ? filtered : products.filter((p) => p.in_stock);
+        const items = activeCat ? pool.slice(0, 8) : interleaveByImage(pool, 8);
+        featuredGrid.innerHTML = items.length
+          ? items.map(renderProductCard).join('')
+          : `<div class="state-card" style="grid-column: 1 / -1;"><p>No in-stock items in this category right now.</p></div>`;
+      };
+
+      if (featuredTabs) {
+        const topCats = categories.slice(0, 5);
+        featuredTabs.innerHTML = [
+          `<button type="button" class="category-pill is-active" data-home-cat="">Featured</button>`,
+          ...topCats.map(
+            (cat) =>
+              `<button type="button" class="category-pill" data-home-cat="${escapeHtml(cat.name)}">${escapeHtml(cat.name)}</button>`
+          ),
+        ].join('');
+
+        featuredTabs.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-home-cat]');
+          if (!btn) return;
+          const selected = btn.getAttribute('data-home-cat') || '';
+          featuredTabs.querySelectorAll('.category-pill').forEach((pill) => {
+            pill.classList.toggle('is-active', pill === btn);
+          });
+          renderFeaturedByCategory(selected);
+        });
       }
-      featuredGrid.innerHTML = interleaved.map(renderProductCard).join('');
-      bindAddToCartButtons(featuredGrid, products);
+
+      renderFeaturedByCategory('');
     }
   } catch (err) {
     if (featuredGrid) {
@@ -141,14 +170,14 @@ async function initHomePage() {
 }
 
 /* ==========================================================================
-   SHOP PAGE CONTROLLER
+   CATALOGUE PAGE CONTROLLER (shop.html — Visual Category Browse, No Search)
    ========================================================================== */
 async function initShopPage() {
   const grid = document.getElementById('shop-products-grid');
   const countEl = document.getElementById('shop-results-count');
   const paginationEl = document.getElementById('shop-pagination');
   const headingEl = document.getElementById('shop-page-heading');
-  const queryInput = document.getElementById('shop-filter-query');
+  const categoryPillsEl = document.getElementById('shop-category-pills');
   const catSelect = document.getElementById('shop-filter-category');
   const brandSelect = document.getElementById('shop-filter-brand');
   const minInput = document.getElementById('shop-filter-min');
@@ -163,14 +192,13 @@ async function initShopPage() {
 
   const params = new URLSearchParams(window.location.search);
   const state = {
-    query: params.get('q') || '',
     category: params.get('category') || '',
     brand: params.get('brand') || '',
     minPrice: params.get('min') || '',
     maxPrice: params.get('max') || '',
     rxMode: params.get('rx') || 'all',
     inStockOnly: params.get('stock') === '1',
-    sortBy: params.get('sort') || 'relevance',
+    sortBy: params.get('sort') || 'featured',
     page: Math.max(1, Number(params.get('page')) || 1),
   };
 
@@ -189,9 +217,18 @@ async function initShopPage() {
     return;
   }
 
-  // Populate dynamic categories & brands from data.json
   const categories = extractCategories(allProducts);
   const brands = extractBrands(allProducts);
+
+  if (categoryPillsEl) {
+    categoryPillsEl.innerHTML = [
+      `<button type="button" class="category-pill ${state.category === '' ? 'is-active' : ''}" data-cat-pill="">All (${allProducts.length})</button>`,
+      ...categories.map(
+        (c) =>
+          `<button type="button" class="category-pill ${state.category === c.name ? 'is-active' : ''}" data-cat-pill="${escapeHtml(c.name)}">${escapeHtml(c.name)} (${c.count})</button>`
+      ),
+    ].join('');
+  }
 
   if (catSelect) {
     catSelect.innerHTML =
@@ -209,11 +246,17 @@ async function initShopPage() {
     brandSelect.value = state.brand;
   }
 
-  if (queryInput) queryInput.value = state.query;
   if (minInput) minInput.value = state.minPrice;
   if (maxInput) maxInput.value = state.maxPrice;
   if (inStockCheck) inStockCheck.checked = state.inStockOnly;
   if (sortSelect) sortSelect.value = state.sortBy;
+
+  const syncCategoryControls = () => {
+    if (catSelect) catSelect.value = state.category;
+    categoryPillsEl?.querySelectorAll('[data-cat-pill]').forEach((pill) => {
+      pill.classList.toggle('is-active', (pill.getAttribute('data-cat-pill') || '') === state.category);
+    });
+  };
 
   const syncRxButtons = () => {
     rxBtns.forEach((btn) => {
@@ -224,16 +267,12 @@ async function initShopPage() {
 
   const renderShop = () => {
     const filtered = filterProducts(allProducts, state);
-    const sorted = sortProducts(filtered, state.sortBy, state.query);
+    const sorted = sortProducts(filtered, state.sortBy);
     const pageData = paginateProducts(sorted, state.page, CONFIG.ITEMS_PER_PAGE);
     state.page = pageData.currentPage;
 
     if (headingEl) {
-      headingEl.textContent = state.category
-        ? state.category
-        : state.query
-          ? `Search results for "${state.query}"`
-          : 'All Medicines & Health Products';
+      headingEl.textContent = state.category || 'All Medicines & Health Products';
     }
 
     if (countEl) {
@@ -245,8 +284,8 @@ async function initShopPage() {
     if (!pageData.items.length) {
       grid.innerHTML = `
         <div class="state-card" style="grid-column: 1 / -1;">
-          <h3>No matching medicines found</h3>
-          <p>Try clearing some filters, searching by salt composition, or upload your prescription and we will arrange it for you in Baruipur.</p>
+          <h3>No matching items in this filter</h3>
+          <p>Try resetting filters or upload your doctor's prescription and our Baruipur pharmacist will arrange your medicines.</p>
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
             <button type="button" class="btn btn-secondary" id="empty-reset-btn">Reset All Filters</button>
             <a class="btn btn-primary" href="${resolveHref('prescription.html')}">Upload Prescription</a>
@@ -282,39 +321,37 @@ async function initShopPage() {
   };
 
   const resetAll = () => {
-    state.query = '';
     state.category = '';
     state.brand = '';
     state.minPrice = '';
     state.maxPrice = '';
     state.rxMode = 'all';
     state.inStockOnly = false;
-    state.sortBy = 'relevance';
+    state.sortBy = 'featured';
     state.page = 1;
-    if (queryInput) queryInput.value = '';
-    if (catSelect) catSelect.value = '';
+    syncCategoryControls();
     if (brandSelect) brandSelect.value = '';
     if (minInput) minInput.value = '';
     if (maxInput) maxInput.value = '';
     if (inStockCheck) inStockCheck.checked = false;
-    if (sortSelect) sortSelect.value = 'relevance';
+    if (sortSelect) sortSelect.value = 'featured';
     syncRxButtons();
     renderShop();
   };
 
-  bindAddToCartButtons(grid, allProducts);
+  categoryPillsEl?.addEventListener('click', (e) => {
+    const pill = e.target.closest('[data-cat-pill]');
+    if (!pill) return;
+    state.category = pill.getAttribute('data-cat-pill') || '';
+    state.page = 1;
+    syncCategoryControls();
+    renderShop();
+  });
 
-  queryInput?.addEventListener(
-    'input',
-    debounce((e) => {
-      state.query = e.target.value;
-      state.page = 1;
-      renderShop();
-    }, 200)
-  );
   catSelect?.addEventListener('change', (e) => {
     state.category = e.target.value;
     state.page = 1;
+    syncCategoryControls();
     renderShop();
   });
   brandSelect?.addEventListener('change', (e) => {
@@ -383,11 +420,7 @@ async function initProductPage() {
 
     document.title = `${product.name} | ${CONFIG.BRAND_NAME}`;
     const placeholderUrl = resolveHref('images/placeholder.svg');
-    const waBuyUrl = buildWhatsAppUrl(
-      `Hello ${CONFIG.BRAND_NAME}, I would like to order:\n${product.name}${
-        product.pack_size ? ` (${product.pack_size})` : ''
-      } — ${formatINR(product.price)}. Please confirm availability.`
-    );
+    const waBuyUrl = buildProductWhatsAppUrl(product);
 
     const detailBlocks = [
       { title: 'Overview & Description', body: product.description },
@@ -414,6 +447,13 @@ async function initProductPage() {
             referrerpolicy="no-referrer"
             onerror="this.onerror=null;this.src='${placeholderUrl}';"
           />
+          <span class="product-badge-row">
+            ${
+              product.prescription_required
+                ? '<span class="product-rx-flag">Rx Required</span>'
+                : '<span class="product-otc-flag">OTC</span>'
+            }
+          </span>
         </div>
 
         <div class="pdp-module">
@@ -437,26 +477,24 @@ async function initProductPage() {
           ${
             product.prescription_required
               ? `<div class="rx-notice-box" role="note">
-                  <strong>Prescription Required (Schedule H / H1):</strong> A valid doctor's prescription is required before dispatch. You can share your prescription during checkout or on the <a href="${resolveHref('prescription.html')}" style="text-decoration:underline;font-weight:600;">Upload Prescription</a> page.
+                  <strong>Prescription Required (Schedule H / H1):</strong> A valid doctor's prescription is required before dispatch. You can share it on WhatsApp or via our <a href="${resolveHref('prescription.html')}" style="text-decoration:underline;font-weight:600;">Upload Prescription</a> page.
                 </div>`
               : ''
           }
 
           <div class="pdp-actions">
+            <a class="btn btn-whatsapp btn-lg" href="${waBuyUrl}" target="_blank" rel="noopener noreferrer">
+              ${ICONS.whatsapp}
+              <span>${product.in_stock ? 'Order on WhatsApp' : 'Enquire Restock on WhatsApp'}</span>
+            </a>
+            <a class="btn btn-secondary btn-lg" href="${buildTelUrl()}">
+              ${ICONS.phone}
+              <span>Call ${CONFIG.PHONE_RAW}</span>
+            </a>
             ${
-              product.in_stock
-                ? `
-              <div class="qty-stepper" aria-label="Quantity selector">
-                <button type="button" class="qty-btn" id="pdp-qty-dec" aria-label="Decrease quantity">−</button>
-                <span class="qty-value tabular-nums" id="pdp-qty-val">1</span>
-                <button type="button" class="qty-btn" id="pdp-qty-inc" aria-label="Increase quantity">+</button>
-              </div>
-              <button type="button" class="btn btn-primary btn-lg" id="pdp-add-btn">Add to Cart</button>
-              <a class="btn btn-whatsapp btn-lg" href="${waBuyUrl}" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a>
-            `
-                : `
-              <a class="btn btn-whatsapp btn-lg" href="${waBuyUrl}" target="_blank" rel="noopener noreferrer">Enquire Restock on WhatsApp</a>
-            `
+              product.prescription_required
+                ? `<a class="btn btn-soft btn-lg" href="${resolveHref('prescription.html')}">Upload Prescription</a>`
+                : ''
             }
           </div>
         </div>
@@ -483,370 +521,13 @@ async function initProductPage() {
       </div>
     `;
 
-    let qty = 1;
-    const qtyVal = document.getElementById('pdp-qty-val');
-    document.getElementById('pdp-qty-dec')?.addEventListener('click', () => {
-      qty = Math.max(1, qty - 1);
-      if (qtyVal) qtyVal.textContent = String(qty);
-    });
-    document.getElementById('pdp-qty-inc')?.addEventListener('click', () => {
-      qty = Math.min(20, qty + 1);
-      if (qtyVal) qtyVal.textContent = String(qty);
-    });
-    document.getElementById('pdp-add-btn')?.addEventListener('click', () => {
-      addToCart(product, qty);
-      updateCartBadges(true);
-      showToast(`Added ${qty} × ${product.name} to cart`);
-    });
-
     if (relatedRoot) {
       const related = getRelatedProducts(products, product, 4);
       relatedRoot.innerHTML = related.map(renderProductCard).join('');
-      bindAddToCartButtons(relatedRoot, products);
     }
   } catch (err) {
     root.innerHTML = `<div class="state-card"><h1>Unable to load product</h1><p>${escapeHtml(err.message)}</p></div>`;
   }
-}
-
-/* ==========================================================================
-   CART PAGE CONTROLLER
-   ========================================================================== */
-function initCartPage() {
-  const root = document.getElementById('cart-page-root');
-  if (!root) return;
-
-  const renderCart = () => {
-    const items = getCart();
-    const summary = calculateCartSummary(items);
-    const placeholderUrl = resolveHref('images/placeholder.svg');
-
-    if (!items.length) {
-      root.innerHTML = `
-        <div class="state-card">
-          <h2>Your medicine cart is empty</h2>
-          <p>Search our Baruipur catalogue or upload your doctor's prescription for quick home delivery.</p>
-          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-            <a class="btn btn-primary" href="${resolveHref('shop.html')}">Browse Medicines</a>
-            <a class="btn btn-secondary" href="${resolveHref('prescription.html')}">Upload Prescription</a>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    root.innerHTML = `
-      <div class="cart-layout">
-        <div>
-          <div class="delivery-progress">
-            <div style="font-size:15px;font-weight:600;color:var(--color-primary-dark);">
-              ${
-                summary.qualifiesFreeDelivery
-                  ? 'You unlocked FREE home delivery in Baruipur!'
-                  : `Add <span class="tabular-nums">${formatINR(summary.amountToFreeDelivery)}</span> more for FREE home delivery (orders above ${formatINR(summary.freeThreshold)})`
-              }
-            </div>
-            <div class="progress-track" aria-hidden="true">
-              <div class="progress-fill" style="width:${summary.progressPercent}%;"></div>
-            </div>
-          </div>
-
-          ${
-            summary.hasRx
-              ? `<div class="rx-notice-box" style="margin-top:0;margin-bottom:18px;">
-                  <strong>Prescription Notice:</strong> One or more medicines in your cart require a valid doctor's prescription. You will be prompted to share it on WhatsApp at checkout.
-                </div>`
-              : ''
-          }
-
-          <div class="cart-list">
-            ${items
-              .map(
-                (item) => `
-              <article class="cart-item" data-cart-row="${escapeHtml(item.id)}">
-                <img class="cart-item-img" src="${resolveHref(item.image)}" alt="${escapeHtml(item.name)}" onerror="this.onerror=null;this.src='${placeholderUrl}';" />
-                <div>
-                  <a href="${resolveHref(`product.html?id=${encodeURIComponent(item.id)}`)}" style="font-family:var(--font-display);font-weight:700;font-size:16px;">
-                    ${escapeHtml(item.name)}
-                  </a>
-                  <div style="font-size:13px;color:var(--ink-muted);margin-top:2px;">
-                    ${escapeHtml([item.brand, item.pack_size, item.prescription_required ? 'Rx Required' : ''].filter(Boolean).join(' · '))}
-                  </div>
-                  <div style="margin-top:8px;display:flex;align-items:baseline;gap:8px;" class="tabular-nums">
-                    <strong>${formatINR(item.price)}</strong>
-                    ${item.mrp > item.price ? `<span class="price-mrp">${formatINR(item.mrp)}</span>` : ''}
-                  </div>
-                </div>
-                <div class="cart-item-actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-                  <div class="qty-stepper">
-                    <button type="button" class="qty-btn" data-qty-dec="${escapeHtml(item.id)}" aria-label="Decrease quantity of ${escapeHtml(item.name)}">−</button>
-                    <span class="qty-value tabular-nums">${item.quantity}</span>
-                    <button type="button" class="qty-btn" data-qty-inc="${escapeHtml(item.id)}" aria-label="Increase quantity of ${escapeHtml(item.name)}">+</button>
-                  </div>
-                  <button type="button" class="text-link" style="font-size:13px;color:var(--color-danger);background:none;border:0;padding:2px;" data-remove-item="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.name)} from cart">
-                    Remove
-                  </button>
-                </div>
-              </article>`
-              )
-              .join('')}
-          </div>
-        </div>
-
-        <aside class="summary-card" aria-label="Order summary">
-          <h2 style="font-size:20px;margin-bottom:14px;">Order Summary</h2>
-          <div class="summary-row tabular-nums">
-            <span>Items (${summary.itemCount})</span>
-            <span>${formatINR(summary.mrpTotal)}</span>
-          </div>
-          ${
-            summary.savings > 0
-              ? `<div class="summary-row tabular-nums" style="color:var(--color-primary-dark);font-weight:600;">
-                  <span>Total Savings</span>
-                  <span>− ${formatINR(summary.savings)}</span>
-                </div>`
-              : ''
-          }
-          <div class="summary-row tabular-nums">
-            <span>Delivery Fee</span>
-            <span>${summary.shipping === 0 ? 'FREE' : formatINR(summary.shipping)}</span>
-          </div>
-          <div class="summary-row summary-row--total tabular-nums">
-            <span>Estimated Total</span>
-            <span>${formatINR(summary.grandTotal)}</span>
-          </div>
-          <div style="display:grid;gap:10px;margin-top:20px;">
-            <a class="btn btn-primary btn-lg btn-block" href="${resolveHref('checkout.html')}">Proceed to Checkout</a>
-            <a class="btn btn-secondary btn-block" href="${resolveHref('shop.html')}">Continue Shopping</a>
-          </div>
-          <p style="font-size:13px;color:var(--ink-muted);margin-top:14px;">
-            Pay via Cash on Delivery or UPI upon delivery in Baruipur. No online card details required.
-          </p>
-        </aside>
-      </div>
-    `;
-  };
-
-  root.addEventListener('click', (e) => {
-    const dec = e.target.closest('[data-qty-dec]');
-    const inc = e.target.closest('[data-qty-inc]');
-    const rem = e.target.closest('[data-remove-item]');
-    const cart = getCart();
-
-    if (dec) {
-      const id = dec.getAttribute('data-qty-dec');
-      const found = cart.find((i) => i.id === id);
-      if (found) {
-        updateQuantity(id, found.quantity - 1);
-        updateCartBadges(false);
-        renderCart();
-      }
-    } else if (inc) {
-      const id = inc.getAttribute('data-qty-inc');
-      const found = cart.find((i) => i.id === id);
-      if (found) {
-        updateQuantity(id, found.quantity + 1);
-        updateCartBadges(false);
-        renderCart();
-      }
-    } else if (rem) {
-      const id = rem.getAttribute('data-remove-item');
-      removeFromCart(id);
-      updateCartBadges(false);
-      showToast('Item removed from cart');
-      renderCart();
-    }
-  });
-
-  renderCart();
-}
-
-/* ==========================================================================
-   CHECKOUT PAGE CONTROLLER
-   ========================================================================== */
-function initCheckoutPage() {
-  const root = document.getElementById('checkout-page-root');
-  if (!root) return;
-
-  const items = getCart();
-  if (!items.length) {
-    root.innerHTML = `
-      <div class="state-card">
-        <h2>No items to check out</h2>
-        <p>Add medicines to your cart first, or send your prescription directly to our Baruipur pharmacy.</p>
-        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-          <a class="btn btn-primary" href="${resolveHref('shop.html')}">Shop Medicines</a>
-          <a class="btn btn-secondary" href="${resolveHref('prescription.html')}">Upload Prescription</a>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  const summary = calculateCartSummary(items);
-  let selectedRxFileName = '';
-
-  root.innerHTML = `
-    <div class="cart-layout">
-      <form class="form-card" id="checkout-form" novalidate>
-        <h2 style="font-size:22px;margin-bottom:6px;">Delivery &amp; Patient Details</h2>
-        <p style="color:var(--ink-secondary);font-size:15px;margin-bottom:22px;">
-          Complete your details below to generate your confirmed WhatsApp order summary for our Baruipur pharmacy counter.
-        </p>
-
-        ${
-          summary.hasRx
-            ? `<div class="rx-notice-box" style="margin-top:0;margin-bottom:20px;">
-                <strong>Prescription Required:</strong> Your order contains prescription medicines. Select your prescription below to preview it, then attach the image/PDF in the WhatsApp chat.
-              </div>`
-            : ''
-        }
-
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="form-label" for="co-name">Full Name *</label>
-            <input class="form-input" id="co-name" name="name" type="text" required placeholder="e.g. Subhajit Mondal" />
-            <span class="field-error" id="err-name" role="alert"></span>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="co-phone">Mobile Number (10 digits) *</label>
-            <input class="form-input" id="co-phone" name="phone" type="tel" inputmode="numeric" required placeholder="e.g. 9830012345" />
-            <span class="field-error" id="err-phone" role="alert"></span>
-          </div>
-
-          <div class="form-field form-field--full">
-            <label class="form-label" for="co-address">Complete Delivery Address &amp; Landmark *</label>
-            <textarea class="form-textarea" id="co-address" name="address" required placeholder="House/Flat No., Street, Para / Landmark, Baruipur"></textarea>
-            <span class="field-error" id="err-address" role="alert"></span>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="co-pincode">Pincode *</label>
-            <input class="form-input" id="co-pincode" name="pincode" type="text" inputmode="numeric" value="700144" required placeholder="700144" />
-            <span class="field-error" id="err-pincode" role="alert"></span>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="co-notes">Delivery Notes (Optional)</label>
-            <input class="form-input" id="co-notes" name="notes" type="text" placeholder="e.g. Call before arriving, evening delivery" />
-          </div>
-
-          <div class="form-field form-field--full">
-            <label class="form-label" for="co-rx-file">Prescription Attachment Preview (${summary.hasRx ? 'Recommended for Rx items' : 'Optional'})</label>
-            <input class="form-input" id="co-rx-file" type="file" accept=".jpg,.jpeg,.png,.pdf" style="padding:8px;" />
-            <div id="co-rx-preview"></div>
-          </div>
-        </div>
-
-        <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
-          <button type="submit" class="btn btn-whatsapp btn-lg">Place Order via WhatsApp</button>
-          <a class="btn btn-secondary btn-lg" href="${buildTelUrl()}">Call to Order (${CONFIG.PHONE_RAW})</a>
-        </div>
-      </form>
-
-      <aside class="summary-card">
-        <h2 style="font-size:20px;margin-bottom:14px;">Items in Your Order</h2>
-        <div style="display:grid;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border-hairline);margin-bottom:10px;">
-          ${items
-            .map(
-              (item) => `
-            <div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;">
-              <span>${escapeHtml(item.name)} × ${item.quantity}${item.prescription_required ? ' (Rx)' : ''}</span>
-              <strong class="tabular-nums">${formatINR(item.price * item.quantity)}</strong>
-            </div>`
-            )
-            .join('')}
-        </div>
-        <div class="summary-row tabular-nums"><span>Subtotal</span><span>${formatINR(summary.subtotal)}</span></div>
-        <div class="summary-row tabular-nums"><span>Delivery</span><span>${summary.shipping === 0 ? 'FREE' : formatINR(summary.shipping)}</span></div>
-        <div class="summary-row summary-row--total tabular-nums"><span>Total Payable</span><span>${formatINR(summary.grandTotal)}</span></div>
-      </aside>
-    </div>
-  `;
-
-  const fileInput = document.getElementById('co-rx-file');
-  const previewBox = document.getElementById('co-rx-preview');
-  fileInput?.addEventListener('change', () => {
-    const file = fileInput.files?.[0];
-    if (!file) {
-      selectedRxFileName = '';
-      if (previewBox) previewBox.innerHTML = '';
-      return;
-    }
-    selectedRxFileName = file.name;
-    renderFilePreview(file, previewBox, () => {
-      selectedRxFileName = '';
-      fileInput.value = '';
-      if (previewBox) previewBox.innerHTML = '';
-    });
-  });
-
-  const form = document.getElementById('checkout-form');
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const result = validateCheckoutForm({
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-      address: formData.get('address'),
-      pincode: formData.get('pincode'),
-      notes: formData.get('notes'),
-      prescriptionFileName: selectedRxFileName,
-    });
-
-    ['name', 'phone', 'address', 'pincode'].forEach((key) => {
-      const input = document.getElementById(`co-${key}`);
-      const errEl = document.getElementById(`err-${key}`);
-      const msg = result.errors[key] || '';
-      if (input) input.classList.toggle('is-invalid', Boolean(msg));
-      if (errEl) errEl.textContent = msg;
-    });
-
-    if (!result.isValid) {
-      showToast('Please check the highlighted fields.');
-      return;
-    }
-
-    const orderRef = generateOrderRef();
-    const waUrl = getWhatsAppOrderUrl({
-      orderRef,
-      customer: result.cleaned,
-      items,
-      summary,
-    });
-
-    clearCart();
-    updateCartBadges(false);
-
-    root.innerHTML = `
-      <div class="state-card" style="max-width:680px;text-align:left;padding:36px;">
-        <div class="section-kicker">Order Request Ready</div>
-        <h2 style="font-size:26px;margin-bottom:8px;">Thank you, ${escapeHtml(result.cleaned.name)}!</h2>
-        <p style="margin-bottom:16px;">
-          Your order reference is <strong class="tabular-nums">${escapeHtml(orderRef)}</strong> (Total: <strong class="tabular-nums">${formatINR(summary.grandTotal)}</strong>). Tap the green button below to send this order summary to our Baruipur pharmacist on WhatsApp for instant confirmation.
-        </p>
-        ${
-          selectedRxFileName || summary.hasRx
-            ? `<div class="rx-notice-box" style="margin-top:0;margin-bottom:18px;">
-                <strong>Reminder:</strong> Please attach your prescription photo/PDF${selectedRxFileName ? ` (${escapeHtml(selectedRxFileName)})` : ''} directly inside the WhatsApp chat once it opens.
-              </div>`
-            : ''
-        }
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;">
-          <a class="btn btn-whatsapp btn-lg" href="${waUrl}" target="_blank" rel="noopener noreferrer" id="confirm-wa-order-link">
-            Send Order on WhatsApp Now
-          </a>
-          <a class="btn btn-secondary btn-lg" href="${buildTelUrl()}">
-            Call to Confirm (${CONFIG.PHONE_RAW})
-          </a>
-          <a class="btn btn-soft btn-lg" href="${resolveHref('shop.html')}">
-            Back to Shop
-          </a>
-        </div>
-      </div>
-    `;
-  });
 }
 
 /* ==========================================================================
@@ -1047,9 +728,6 @@ document.addEventListener('DOMContentLoaded', () => {
   hydrateConfigBindings();
   initScrollReveal();
 
-  window.addEventListener('pharmawala:cart-updated', () => updateCartBadges(false));
-  window.addEventListener('storage', () => updateCartBadges(false));
-
   // Populate mega menu categories asynchronously on non-catalog pages too
   if (page !== 'home' && page !== 'shop' && page !== 'product') {
     loadProducts()
@@ -1066,12 +744,6 @@ document.addEventListener('DOMContentLoaded', () => {
       break;
     case 'product':
       initProductPage();
-      break;
-    case 'cart':
-      initCartPage();
-      break;
-    case 'checkout':
-      initCheckoutPage();
       break;
     case 'prescription':
       initPrescriptionPage();
