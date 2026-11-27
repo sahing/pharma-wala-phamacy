@@ -408,21 +408,50 @@ export function renderFooter() {
 }
 
 export function renderFloatingDoctorButton(activePage = '') {
-  if (activePage === 'clinic') return;
-  if (document.getElementById('floating-doctor-cta')) return;
-
-  const clinicHref = resolveHref(CONFIG.CLINIC_URL);
-  const link = document.createElement('a');
-  link.id = 'floating-doctor-cta';
-  link.className = 'floating-doctor-btn';
-  link.href = clinicHref;
-  if (/^https?:/i.test(CONFIG.CLINIC_URL)) {
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
+  let dock = document.getElementById('floating-cta-dock');
+  if (!dock) {
+    dock = document.createElement('div');
+    dock.id = 'floating-cta-dock';
+    dock.className = 'floating-cta-dock';
+    document.body.appendChild(dock);
   }
-  link.setAttribute('aria-label', 'Book a Doctor at Pharmawala Polyclinic');
-  link.innerHTML = `${ICONS.stethoscope}<span>Book a Doctor</span>`;
-  document.body.appendChild(link);
+
+  if (activePage !== 'clinic' && !document.getElementById('floating-doctor-cta')) {
+    const clinicHref = resolveHref(CONFIG.CLINIC_URL);
+    const link = document.createElement('a');
+    link.id = 'floating-doctor-cta';
+    link.className = 'floating-doctor-btn';
+    link.href = clinicHref;
+    if (/^https?:/i.test(CONFIG.CLINIC_URL)) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+    link.setAttribute('aria-label', 'Book a Doctor at Pharmawala Polyclinic');
+    link.innerHTML = `${ICONS.stethoscope}<span>Book a Doctor</span>`;
+    dock.appendChild(link);
+  }
+
+  if (!document.getElementById('floating-whatsapp-cta')) {
+    const isClinic = activePage === 'clinic';
+    const waMsg = isClinic
+      ? `Hello ${CONFIG.CLINIC_NAME}, I would like to book a doctor appointment.`
+      : `Hello ${CONFIG.BRAND_NAME}, I would like to order medicines or enquire about availability.`;
+    const waLink = document.createElement('a');
+    waLink.id = 'floating-whatsapp-cta';
+    waLink.className = 'floating-wa-btn';
+    waLink.href = buildWhatsAppUrl(waMsg);
+    waLink.target = '_blank';
+    waLink.rel = 'noopener noreferrer';
+    waLink.setAttribute('aria-label', isClinic ? 'Chat with Pharmawala Polyclinic on WhatsApp' : 'Order Medicines on WhatsApp');
+    waLink.innerHTML = `
+      <span class="floating-wa-icon" aria-hidden="true">${ICONS.whatsapp}</span>
+      <span class="floating-wa-text">
+        <strong>${isClinic ? 'WhatsApp Clinic' : 'Order on WhatsApp'}</strong>
+        <span>${CONFIG.PHONE_RAW} · Fast Reply</span>
+      </span>
+    `;
+    dock.appendChild(waLink);
+  }
 }
 
 export function renderSkeletonGrid(count = 8) {

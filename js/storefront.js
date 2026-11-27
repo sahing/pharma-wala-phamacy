@@ -747,8 +747,44 @@
       el.innerHTML = '<span class="status-dot" aria-hidden="true"></span>' + (openNow ? 'Store Open Now · Until 10:30 PM' : 'Currently Closed · Opens 8:00 AM');
     });
 
-    var products = getCatalog();
     var page = document.body.getAttribute('data-page') || 'home';
+    var basePrefix = (window.location.pathname || '').indexOf('/policies/') !== -1 ? '../' : '';
+
+    if (!document.getElementById('floating-cta-dock')) {
+      var dock = document.createElement('div');
+      dock.id = 'floating-cta-dock';
+      dock.className = 'floating-cta-dock';
+      var isClinic = page === 'clinic';
+      if (!isClinic) {
+        var docLink = document.createElement('a');
+        docLink.id = 'floating-doctor-cta';
+        docLink.className = 'floating-doctor-btn';
+        docLink.href = basePrefix + CONFIG.CLINIC_URL;
+        docLink.setAttribute('aria-label', 'Book a Doctor at Pharmawala Polyclinic');
+        docLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg><span>Book a Doctor</span>';
+        dock.appendChild(docLink);
+      }
+      var waMsg = isClinic
+        ? 'Hello ' + CONFIG.CLINIC_NAME + ', I would like to book a doctor appointment.'
+        : 'Hello ' + CONFIG.BRAND_NAME + ', I would like to order medicines or enquire about availability.';
+      var waLink = document.createElement('a');
+      waLink.id = 'floating-whatsapp-cta';
+      waLink.className = 'floating-wa-btn';
+      waLink.href = buildWhatsAppUrl(waMsg);
+      waLink.target = '_blank';
+      waLink.rel = 'noopener noreferrer';
+      waLink.setAttribute('aria-label', isClinic ? 'Chat with Pharmawala Polyclinic on WhatsApp' : 'Order Medicines on WhatsApp');
+      waLink.innerHTML =
+        '<span class="floating-wa-icon" aria-hidden="true">' + ICONS.whatsapp + '</span>' +
+        '<span class="floating-wa-text">' +
+          '<strong>' + (isClinic ? 'WhatsApp Clinic' : 'Order on WhatsApp') + '</strong>' +
+          '<span>' + CONFIG.PHONE_RAW + ' · Fast Reply</span>' +
+        '</span>';
+      dock.appendChild(waLink);
+      document.body.appendChild(dock);
+    }
+
+    var products = getCatalog();
     if (page === 'home') initHome(products);
     else if (page === 'shop') initShop(products);
     else if (page === 'product') initProduct(products);

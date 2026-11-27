@@ -2637,23 +2637,92 @@ body.is-drawer-open {
 }
 
 /* ==========================================================================
-   Floating "Book a Doctor" Button & Toast & Mobile Sticky Bottom Bar
+   Floating Right-Side Desktop CTAs (WhatsApp & Doctor) & Toast & Mobile Bar
    ========================================================================== */
-.floating-doctor-btn {
+.floating-cta-dock {
   position: fixed;
-  right: 22px;
+  right: 24px;
   bottom: 24px;
-  z-index: 850;
+  z-index: 860;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.floating-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 18px 9px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #159952 0%, #0E7A40 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 12px 28px -6px rgba(14, 122, 64, 0.48);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+}
+.floating-wa-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 16px 32px -6px rgba(14, 122, 64, 0.56);
+}
+.floating-wa-icon {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #25D366;
+  color: #FFFFFF;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.floating-wa-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #4ADE80;
+  border: 2px solid #0E7A40;
+}
+.floating-wa-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.floating-wa-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.floating-wa-text strong {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.floating-wa-text span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 2px;
+}
+
+.floating-doctor-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 18px;
-  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  border-radius: 999px;
   background-color: var(--color-clinic);
   color: #FFFFFF;
   font-weight: 600;
-  font-size: 14px;
-  box-shadow: var(--shadow-dropdown);
+  font-size: 13.5px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), var(--shadow-dropdown);
   transition: transform var(--transition-fast), background-color var(--transition-fast);
 }
 .floating-doctor-btn:hover {
@@ -2661,14 +2730,14 @@ body.is-drawer-open {
   transform: translateY(-2px);
 }
 .floating-doctor-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .toast-region {
   position: fixed;
-  right: 22px;
-  bottom: 84px;
+  right: 24px;
+  bottom: 148px;
   z-index: 1300;
   display: grid;
   gap: 8px;
