@@ -6,8 +6,6 @@ const htmlPages = {
   main: path.resolve(__dirname, 'index.html'),
   shop: path.resolve(__dirname, 'shop.html'),
   product: path.resolve(__dirname, 'product.html'),
-  cart: path.resolve(__dirname, 'cart.html'),
-  checkout: path.resolve(__dirname, 'checkout.html'),
   prescription: path.resolve(__dirname, 'prescription.html'),
   clinic: path.resolve(__dirname, 'clinic.html'),
   about: path.resolve(__dirname, 'about.html'),
@@ -37,6 +35,14 @@ export default defineConfig(() => {
             const destDir = path.resolve(distDir, dirName);
             if (fs.existsSync(srcDir)) {
               fs.cpSync(srcDir, destDir, {recursive: true, force: true});
+            }
+          }
+          for (const scriptName of ['catalog-data.js', 'storefront.js']) {
+            const srcFile = path.resolve(__dirname, 'js', scriptName);
+            const destDir = path.resolve(distDir, 'js');
+            if (fs.existsSync(srcFile)) {
+              fs.mkdirSync(destDir, {recursive: true});
+              fs.copyFileSync(srcFile, path.resolve(destDir, scriptName));
             }
           }
           for (const fileName of ['sitemap.xml', 'robots.txt']) {

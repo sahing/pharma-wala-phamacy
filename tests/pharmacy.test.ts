@@ -9,12 +9,9 @@ import {
   paginateProducts,
 } from '../js/products.js';
 import {
-  addItemToCartList,
-  calculateCartSummary,
-  validateCheckoutForm,
-  buildWhatsAppOrderMessage,
-} from '../js/cart.js';
-import { getInstantSuggestions } from '../js/search.js';
+  buildProductWhatsAppUrl,
+  isStoreOpenNow,
+} from '../js/config.js';
 
 test('normalizeProduct maps missing fields defensively and auto-computes discount', () => {
   const normalized = normalizeProduct({
@@ -37,7 +34,7 @@ test('normalizeProduct maps missing fields defensively and auto-computes discoun
   assert.equal(normalized.image, 'images/placeholder.svg');
 });
 
-test('filterProducts, sortProducts, extractCategories and paginateProducts work together', () => {
+test('filterProducts, sortProducts, extractCategories and paginateProducts work without search', () => {
   const catalog = [
     normalizeProduct({ id: '1', name: 'Dolo 650', brand: 'Micro Labs', category: 'Medicines', price: 30, mrp: 35, prescription_required: false, in_stock: true }),
     normalizeProduct({ id: '2', name: 'Glycomet GP 1', brand: 'USV', category: 'Diabetes Care', price: 120, mrp: 150, prescription_required: true, in_stock: true }),
@@ -46,6 +43,10 @@ test('filterProducts, sortProducts, extractCategories and paginateProducts work 
 
   assert.equal(extractCategories(catalog).length, 3);
   assert.deepEqual(extractBrands(catalog), ['Micro Labs', 'Omron', 'USV']);
+
+  const byCategory = filterProducts(catalog, { category: 'Diabetes Care' });
+  assert.equal(byCategory.length, 1);
+  assert.equal(byCategory[0].id, '2');
 
   const rxOnly = filterProducts(catalog, { rxMode: 'rx' });
   assert.equal(rxOnly.length, 1);
@@ -62,63 +63,29 @@ test('filterProducts, sortProducts, extractCategories and paginateProducts work 
   assert.equal(page.totalPages, 2);
 });
 
-test('getInstantSuggestions ranks exact name matches above salt/category matches', () => {
-  const catalog = [
-    normalizeProduct({ id: '1', name: 'Pan 40', composition: 'Pantoprazole', category: 'Medicines', price: 140, mrp: 165 }),
-    normalizeProduct({ id: '2', name: 'Dolo 650', composition: 'Paracetamol 650 mg', category: 'Medicines', price: 29, mrp: 34 }),
-  ];
+test('buildProductWhatsAppUrl encodes product name, pack size, price, and Rx note', () => {
+  const product = normalizeProduct({
+    id: 'pw-003',
+    name: 'Telma 40 Tablet',
+    pack_size: 'Strip of 30 tablets',
+    price: 212,
+    mrp: 250,
+    prescription_required: true,
+    in_stock: true,
+  });
 
-  const matches = getInstantSuggestions(catalog, 'Paracetamol');
-  assert.equal(matches.length, 1);
-  assert.equal(matches[0].id, '2');
+  const url = buildProductWhatsAppUrl(product);
+  assert.ok(url.startsWith('https://wa.me/918282082425?text='));
+  const decoded = decodeURIComponent(url.split('?text=')[1]);
+  assert.ok(decoded.includes('Telma 40 Tablet'));
+  assert.ok(decoded.includes('Strip of 30 tablets'));
+  assert.ok(decoded.includes('212'));
+  assert.ok(decoded.includes('valid prescription'));
 });
 
-test('cart calculations compute savings, free delivery threshold, and Rx flag accurately', () => {
-  const p1 = normalizeProduct({ id: '1', name: 'Dolo 650', price: 100, mrp: 120, prescription_required: false });
-  const p2 = normalizeProduct({ id: '2', name: 'Telma 40', price: 250, mrp: 300, prescription_required: true });
-
-  let cart = addItemToCartList([], p1, 2); // 200 (MRP 240)
-  let summary = calculateCartSummary(cart, 499, 35);
-  assert.equal(summary.subtotal, 200);
-  assert.equal(summary.savings, 40);
-  assert.equal(summary.shipping, 35);
-  assert.equal(summary.qualifiesFreeDelivery, false);
-  assert.equal(summary.amountToFreeDelivery, 299);
-  assert.equal(summary.hasRx, false);
-
-  cart = addItemToCartList(cart, p2, 2); // +500 => subtotal 700
-  summary = calculateCartSummary(cart, 499, 35);
-  assert.equal(summary.subtotal, 700);
-  assert.equal(summary.shipping, 0);
-  assert.equal(summary.qualifiesFreeDelivery, true);
-  assert.equal(summary.hasRx, true);
-});
-
-test('validateCheckoutForm rejects invalid inputs and builds formatted WhatsApp order text', () => {
-  const invalid = validateCheckoutForm({ name: 'A', phone: '123', address: 'Short', pincode: '700' });
-  assert.equal(invalid.isValid, false);
-  assert.ok(invalid.errors.name);
-  assert.ok(invalid.errors.phone);
-  assert.ok(invalid.errors.address);
-  assert.ok(invalid.errors.pincode);
-
-  const valid = validateCheckoutForm({
-    name: 'Arindam Sen',
-    phone: '9830011223',
-    address: '14 Station Road, Uttar Khodarbazar, Baruipur',
-    pincode: '700144',
-    notes: 'Call on arrival',
-  });
-  assert.equal(valid.isValid, true);
-
-  const msg = buildWhatsAppOrderMessage({
-    orderRef: 'PW-2026-12345',
-    customer: valid.cleaned,
-    items: [{ id: '1', name: 'Dolo 650', pack_size: 'Strip of 15', price: 29, mrp: 34, quantity: 2, prescription_required: false }],
-    summary: { subtotal: 58, shipping: 35, grandTotal: 93, hasRx: false },
-  });
-  assert.ok(msg.includes('PW-2026-12345'));
-  assert.ok(msg.includes('Dolo 650'));
-  assert.ok(msg.includes('Arindam Sen'));
-  assert.ok(msg.includes('700144'));
+test('isStoreOpenNow accurately checks 8:00 AM to 10:30 PM IST hours', () => {
+  // 10:00 AM IST = 04:30 UTC
+  assert.equal(isStoreOpenNow(new Date('2026-11-27T04:30:00Z')), true);
+  // 11:00 PM IST = 17:30 UTC
+  assert.equal(isStoreOpenNow(new Date('2026-11-27T17:30:00Z')), false);
 });

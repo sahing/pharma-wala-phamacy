@@ -103,20 +103,29 @@ export async function loadProducts({ forceReload = false } = {}) {
     return cachedProducts;
   }
 
-  const dataUrl = resolveHref('data/data.json');
-  const response = await fetch(dataUrl, { headers: { Accept: 'application/json' } });
-  if (!response.ok) {
-    throw new Error(`Unable to load medicine catalogue (HTTP ${response.status}).`);
-  }
+  let rawList = [];
+  try {
+    const dataUrl = resolveHref('data/data.json');
+    const response = await fetch(dataUrl, { headers: { Accept: 'application/json' } });
+    if (!response.ok) {
+      throw new Error(`Unable to load medicine catalogue (HTTP ${response.status}).`);
+    }
 
-  const json = await response.json();
-  const rawList = Array.isArray(json)
-    ? json
-    : Array.isArray(json?.products)
-      ? json.products
-      : Array.isArray(json?.items)
-        ? json.items
-        : [];
+    const json = await response.json();
+    rawList = Array.isArray(json)
+      ? json
+      : Array.isArray(json?.products)
+        ? json.products
+        : Array.isArray(json?.items)
+          ? json.items
+          : [];
+  } catch (err) {
+    if (typeof window !== 'undefined' && Array.isArray(window.__PHARMAWALA_PRODUCTS__)) {
+      rawList = window.__PHARMAWALA_PRODUCTS__;
+    } else {
+      throw err;
+    }
+  }
 
   cachedProducts = rawList.map((entry, idx) => normalizeProduct(entry, idx));
   return cachedProducts;
@@ -140,37 +149,8 @@ export function extractBrands(products) {
   return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
-/**
- * Scores a product against a search query (name > brand > composition > category).
- */
-export function scoreSearchMatch(product, query) {
-  const q = String(query || '').trim().toLowerCase();
-  if (!q) return 1;
-
-  const terms = q.split(/\s+/).filter(Boolean);
-  const haystackName = product.name.toLowerCase();
-  const haystackBrand = product.brand.toLowerCase();
-  const haystackSalt = product.composition.toLowerCase();
-  const haystackCat = product.category.toLowerCase();
-  const combined = `${haystackName} ${haystackBrand} ${haystackSalt} ${haystackCat}`;
-
-  for (const term of terms) {
-    if (!combined.includes(term)) return 0;
-  }
-
-  let score = 10;
-  if (haystackName.startsWith(q)) score += 60;
-  else if (haystackName.includes(q)) score += 40;
-  if (haystackSalt.includes(q)) score += 25;
-  if (haystackBrand.includes(q)) score += 18;
-  if (haystackCat.includes(q)) score += 12;
-  if (product.in_stock) score += 5;
-  return score;
-}
-
 export function filterProducts(products, filters = {}) {
   const {
-    query = '',
     category = '',
     brand = '',
     minPrice = null,
@@ -179,12 +159,10 @@ export function filterProducts(products, filters = {}) {
     inStockOnly = false,
   } = filters;
 
-  const q = String(query || '').trim();
   const catLower = String(category || '').trim().toLowerCase();
   const brandLower = String(brand || '').trim().toLowerCase();
 
   return products.filter((p) => {
-    if (q && scoreSearchMatch(p, q) === 0) return false;
     if (catLower && p.category.toLowerCase() !== catLower) return false;
     if (brandLower && p.brand.toLowerCase() !== brandLower) return false;
     if (minPrice !== null && minPrice !== '' && Number.isFinite(Number(minPrice)) && p.price < Number(minPrice)) {
@@ -200,7 +178,7 @@ export function filterProducts(products, filters = {}) {
   });
 }
 
-export function sortProducts(products, sortBy = 'relevance', query = '') {
+export function sortProducts(products, sortBy = 'featured') {
   const list = [...products];
   switch (sortBy) {
     case 'price-asc':
@@ -211,11 +189,9 @@ export function sortProducts(products, sortBy = 'relevance', query = '') {
       return list.sort((a, b) => b.discount - a.discount || a.price - b.price);
     case 'name-asc':
       return list.sort((a, b) => a.name.localeCompare(b.name));
+    case 'featured':
     case 'relevance':
     default:
-      if (query && query.trim()) {
-        return list.sort((a, b) => scoreSearchMatch(b, query) - scoreSearchMatch(a, query));
-      }
       return list.sort((a, b) => Number(b.featured) - Number(a.featured) || Number(b.in_stock) - Number(a.in_stock));
   }
 }

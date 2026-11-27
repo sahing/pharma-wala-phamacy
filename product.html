@@ -19,7 +19,130 @@
     <link rel="stylesheet" href="css/responsive.css" />
   </head>
   <body data-page="product">
-    <div id="site-header-root"></div>
+    <div id="site-header-root">
+      <div class="announcement-bar">
+        <div class="container announcement-inner">
+          <div class="announcement-text">
+            <span>Free home delivery in Baruipur above ₹499</span>
+            <span class="announcement-sep" aria-hidden="true">|</span>
+            <span>Open Daily: 8:00 AM – 10:30 PM</span>
+          </div>
+          <div class="announcement-links">
+            <a href="prescription.html">Upload Prescription</a>
+            <a href="clinic.html">Pharmawala Polyclinic</a>
+          </div>
+        </div>
+      </div>
+      <header class="site-header" role="banner">
+        <div class="container header-main header-main--single">
+          <a class="brand-link" href="index.html">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+            <span class="brand-text">
+              <span class="brand-name">Pharmawala Pharmacy</span>
+              <span class="brand-sub">Baruipur · Kolkata-700144</span>
+            </span>
+          </a>
+          <nav class="nav-inline" aria-label="Primary navigation">
+            <ul class="nav-list nav-list--inline">
+              <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+              <li class="nav-item"><a class="nav-link is-active" href="shop.html">Catalogue</a></li>
+              <li class="nav-item"><a class="nav-link" href="prescription.html">Upload Rx</a></li>
+              <li class="nav-item"><a class="nav-link nav-link-clinic" href="clinic.html">Polyclinic <span class="sister-tag">Clinic</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+              <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+            </ul>
+          </nav>
+          <div class="header-actions">
+            <a class="header-phone" href="tel:+918282082425" aria-label="Call Pharmawala Pharmacy at 8282082425">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span class="tabular-nums">8282082425</span>
+            </a>
+            <a class="header-wa-cta" href="https://wa.me/918282082425" target="_blank" rel="noopener noreferrer" aria-label="Order on WhatsApp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              <span>WhatsApp Order</span>
+            </a>
+            <button type="button" class="mobile-menu-btn" id="open-mobile-drawer" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav-drawer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
+      <aside class="mobile-drawer" id="mobile-nav-drawer" aria-label="Mobile navigation" aria-hidden="true">
+        <div class="mobile-drawer-header">
+          <div class="mobile-drawer-brand">
+            <span class="brand-mark" style="width:34px;height:34px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+            <div class="mobile-drawer-brand-text">
+              <span class="brand-name">Pharmawala Pharmacy</span>
+              <span class="mobile-drawer-status">Open Daily · 8 AM – 10:30 PM</span>
+            </div>
+          </div>
+          <button type="button" class="mobile-drawer-close" id="close-mobile-drawer" aria-label="Close navigation menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <nav class="mobile-nav-links" aria-label="Mobile links">
+          <a href="index.html"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></span></a>
+          <a href="shop.html" class="is-active"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg><span>Medicine Catalogue</span></span></a>
+          <a href="prescription.html"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload Prescription</span></span></a>
+          <a href="clinic.html" class="mobile-nav-clinic"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg><span>Pharmawala Polyclinic</span></span><span class="sister-tag">Clinic</span></a>
+          <a href="about.html"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>About Us</span></span></a>
+          <a href="contact.html"><span class="mobile-nav-link-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Contact &amp; Location</span></span></a>
+        </nav>
+        <div class="mobile-drawer-section">
+          <div class="mobile-drawer-section-title">Popular Departments</div>
+          <div class="mobile-cat-chips">
+            <a class="mobile-cat-chip" href="shop.html?category=Medicines">Medicines</a>
+            <a class="mobile-cat-chip" href="shop.html?category=Diabetes%20Care">Diabetes Care</a>
+            <a class="mobile-cat-chip" href="shop.html?category=Vitamins%20%26%20Nutrition">Vitamins</a>
+            <a class="mobile-cat-chip" href="shop.html?category=Healthcare%20Devices">Health Devices</a>
+          </div>
+        </div>
+        <div class="mobile-drawer-footer">
+          <div class="mobile-drawer-cta-row">
+            <a class="btn btn-whatsapp" href="https://wa.me/918282082425?text=Hello%20Pharmawala%20Pharmacy%2C%20I%20would%20like%20to%20order%20medicines." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="btn btn-secondary" href="tel:+918282082425">Call Store</a>
+          </div>
+          <div><strong>Timings:</strong> Open Daily: 8:00 AM – 10:30 PM</div>
+          <div>Uttar Khodarbazar, Baruipur-Kalyanpur Road, Baruipur, Kolkata-700144</div>
+        </div>
+      </aside>
+
+      <nav class="mobile-bottom-bar" aria-label="Quick mobile navigation">
+        <a class="mobile-bottom-item" href="index.html"><span class="mobile-bottom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span>Home</span></a>
+        <a class="mobile-bottom-item is-active" href="shop.html"><span class="mobile-bottom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span><span>Medicines</span></a>
+        <a class="mobile-bottom-item" href="prescription.html"><span class="mobile-bottom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span><span>Upload Rx</span></a>
+        <a class="mobile-bottom-item mobile-bottom-item--clinic" href="clinic.html"><span class="mobile-bottom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg></span><span>Consult Doc</span></a>
+        <a class="mobile-bottom-item mobile-bottom-item--whatsapp" href="https://wa.me/918282082425?text=Hello%20Pharmawala%20Pharmacy%2C%20I%20need%20assistance%20with%20medicines." target="_blank" rel="noopener noreferrer"><span class="mobile-bottom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span>WhatsApp</span></a>
+      </nav>
+      <script>
+        (function () {
+          var openBtn = document.getElementById('open-mobile-drawer');
+          var closeBtn = document.getElementById('close-mobile-drawer');
+          var drawer = document.getElementById('mobile-nav-drawer');
+          var backdrop = document.getElementById('mobile-drawer-backdrop');
+          if (!openBtn || !drawer || !backdrop) return;
+          function setDrawer(open) {
+            drawer.classList.toggle('is-open', open);
+            backdrop.classList.toggle('is-open', open);
+            document.body.classList.toggle('is-drawer-open', open);
+            drawer.setAttribute('aria-hidden', String(!open));
+            openBtn.setAttribute('aria-expanded', String(open));
+            if (open && closeBtn) closeBtn.focus();
+          }
+          openBtn.addEventListener('click', function () { setDrawer(true); });
+          if (closeBtn) closeBtn.addEventListener('click', function () { setDrawer(false); });
+          backdrop.addEventListener('click', function () { setDrawer(false); });
+          Array.prototype.slice.call(drawer.querySelectorAll('a')).forEach(function (a) {
+            a.addEventListener('click', function () { setDrawer(false); });
+          });
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && drawer.classList.contains('is-open')) setDrawer(false);
+          });
+        })();
+      </script>
+    </div>
 
     <main id="main-content">
       <section class="section" style="padding-top: 32px;">
@@ -44,7 +167,75 @@
       </section>
     </main>
 
-    <div id="site-footer-root"></div>
+    <div id="site-footer-root">
+      <footer class="site-footer" role="contentinfo">
+        <div class="container">
+          <div class="footer-grid">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <span class="brand-mark" style="width:34px;height:34px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+                <span style="font-family:var(--font-display);font-size:18px;font-weight:700;color:#FFFFFF;">Pharmawala Pharmacy</span>
+              </div>
+              <p style="font-size:14px;line-height:1.6;color:#C2D6CC;max-width:34ch;">
+                Your neighbourhood licensed pharmacy in Baruipur, Kolkata. 100% genuine medicines, honest pricing, and quick home delivery.
+              </p>
+              <div class="footer-meta-block">
+                <div><strong>Address:</strong> Uttar Khodarbazar, Baruipur-Kalyanpur Road, Baruipur, Kolkata-700144</div>
+                <div><strong>Phone / WhatsApp:</strong> <a href="tel:+918282082425" style="color:#FFFFFF;font-weight:600;">8282082425</a></div>
+                <div><strong>Pharmacy Email:</strong> <a href="mailto:pharmawalapharmacy@gmail.com">pharmawalapharmacy@gmail.com</a></div>
+                <div><strong>Timings:</strong> Open Daily: 8:00 AM – 10:30 PM</div>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="footer-heading">Pharmacy Quick Links</h2>
+              <ul class="footer-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Medicines &amp; Health Catalogue</a></li>
+                <li><a href="prescription.html">Upload Prescription</a></li>
+                <li><a href="https://wa.me/918282082425?text=Hello%20Pharmawala%20Pharmacy%2C%20I%20would%20like%20to%20order%20medicines." target="_blank" rel="noopener noreferrer">Order on WhatsApp</a></li>
+                <li><a href="about.html">About Pharmawala</a></li>
+                <li><a href="contact.html">Contact &amp; Directions</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 class="footer-heading">Pharmawala Polyclinic</h2>
+              <p style="font-size:14px;color:#C2D6CC;margin-bottom:12px;">
+                Our sister vertical offering General Physician consultations, basic diagnostics, and chronic care follow-ups in Baruipur.
+              </p>
+              <ul class="footer-links">
+                <li><a href="clinic.html" style="color:#93C5FD;font-weight:600;">Visit Pharmawala Polyclinic &rarr;</a></li>
+                <li><a href="tel:+918282082425">Book Appointment: 8282082425</a></li>
+                <li><a href="mailto:pharmawalapolyclinic@gmail.com?subject=Doctor%20Appointment%20Request">pharmawalapolyclinic@gmail.com</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 class="footer-heading">Policies &amp; Compliance</h2>
+              <ul class="footer-links">
+                <li><a href="policies/privacy.html">Privacy Policy</a></li>
+                <li><a href="policies/terms.html">Terms &amp; Conditions</a></li>
+                <li><a href="policies/returns.html">Return &amp; Refund Policy</a></li>
+                <li><a href="policies/delivery.html">Delivery Information</a></li>
+                <li><a href="https://www.google.com/maps/search/?api=1&query=Uttar+Khodarbazar,+Baruipur-Kalyanpur+Road,+Baruipur,+Kolkata-700144" target="_blank" rel="noopener noreferrer">View Store on Google Maps</a></li>
+              </ul>
+              <div class="footer-meta-block" style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
+                <div><strong>Drug Licence:</strong> WB/24PGS(S)/RET/20B &amp; 21B — [Add Official Licence No.]</div>
+                <div><strong>Pharmacist:</strong> Registered Pharmacist — WBPC Reg. No. [Add Reg. No.]</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <div>&copy; 2026 Pharmawala Pharmacy (pharmawalapharmacy.com). All rights reserved.</div>
+            <div>Serving Uttar Khodarbazar, Baruipur &amp; South 24 Parganas, Kolkata-700144</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script src="js/catalog-data.js"></script>
+    <script src="js/storefront.js"></script>
     <script type="module" src="js/app.js"></script>
   </body>
 </html>
