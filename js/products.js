@@ -103,20 +103,29 @@ export async function loadProducts({ forceReload = false } = {}) {
     return cachedProducts;
   }
 
-  const dataUrl = resolveHref('data/data.json');
-  const response = await fetch(dataUrl, { headers: { Accept: 'application/json' } });
-  if (!response.ok) {
-    throw new Error(`Unable to load medicine catalogue (HTTP ${response.status}).`);
-  }
+  let rawList = [];
+  try {
+    const dataUrl = resolveHref('data/data.json');
+    const response = await fetch(dataUrl, { headers: { Accept: 'application/json' } });
+    if (!response.ok) {
+      throw new Error(`Unable to load medicine catalogue (HTTP ${response.status}).`);
+    }
 
-  const json = await response.json();
-  const rawList = Array.isArray(json)
-    ? json
-    : Array.isArray(json?.products)
-      ? json.products
-      : Array.isArray(json?.items)
-        ? json.items
-        : [];
+    const json = await response.json();
+    rawList = Array.isArray(json)
+      ? json
+      : Array.isArray(json?.products)
+        ? json.products
+        : Array.isArray(json?.items)
+          ? json.items
+          : [];
+  } catch (err) {
+    if (typeof window !== 'undefined' && Array.isArray(window.__PHARMAWALA_PRODUCTS__)) {
+      rawList = window.__PHARMAWALA_PRODUCTS__;
+    } else {
+      throw err;
+    }
+  }
 
   cachedProducts = rawList.map((entry, idx) => normalizeProduct(entry, idx));
   return cachedProducts;

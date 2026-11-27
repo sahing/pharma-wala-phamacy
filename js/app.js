@@ -88,7 +88,7 @@ function interleaveByImage(pool, limit = 8) {
    HOME PAGE CONTROLLER
    ========================================================================== */
 async function initHomePage() {
-  initCarousel('hero-banner-carousel', { intervalMs: 5500 });
+  initCarousel('hero-banner-carousel', { intervalMs: 4500 });
   initAccordions();
 
   const catGrid = document.getElementById('home-categories-grid');
@@ -719,6 +719,10 @@ function initEnquiryForm(formId, targetEmail, defaultSubject) {
 /* ==========================================================================
    BOOTSTRAP
    ========================================================================== */
+if (typeof window !== 'undefined') {
+  window.__PHARMAWALA_APP_READY__ = true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const page = document.body.getAttribute('data-page') || 'home';
 

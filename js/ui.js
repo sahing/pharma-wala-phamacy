@@ -37,6 +37,9 @@ export const ICONS = {
   bandage: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"/><path d="M10 10h.01M14 14h.01M14 10h.01M10 14h.01"/></svg>`,
   mapPin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
   clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  grid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>`,
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
 };
 
 export function getCategoryIcon(categoryName) {
@@ -181,41 +184,77 @@ export function renderHeader(activePage = '') {
     <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
     <aside class="mobile-drawer" id="mobile-nav-drawer" aria-label="Mobile navigation" aria-hidden="true">
       <div class="mobile-drawer-header">
-        <span class="brand-name">${escapeHtml(CONFIG.BRAND_NAME)}</span>
+        <div class="mobile-drawer-brand">
+          <span class="brand-mark" style="width:34px;height:34px;">${isClinic ? ICONS.stethoscope : ICONS.cross}</span>
+          <div class="mobile-drawer-brand-text">
+            <span class="brand-name">${escapeHtml(isClinic ? CONFIG.CLINIC_NAME : CONFIG.BRAND_NAME)}</span>
+            <span class="mobile-drawer-status">${openNow ? 'Open Now · Until 10:30 PM' : 'Opens Daily 8:00 AM'}</span>
+          </div>
+        </div>
         <button type="button" class="mobile-drawer-close" id="close-mobile-drawer" aria-label="Close navigation menu">
           ${ICONS.close}
         </button>
       </div>
-      <nav class="mobile-nav-links">
-        <a href="${resolveHref('index.html')}" class="${activePage === 'home' ? 'is-active' : ''}">Home</a>
-        <a href="${resolveHref('shop.html')}" class="${activePage === 'shop' ? 'is-active' : ''}">Medicine Catalogue</a>
-        <a href="${resolveHref('prescription.html')}" class="${activePage === 'prescription' ? 'is-active' : ''}">Upload Prescription</a>
-        <a href="${clinicHref}"${clinicTargetAttr} class="${activePage === 'clinic' ? 'is-active' : ''}">
-          <span>${escapeHtml(CONFIG.CLINIC_NAME)}</span>
-          <span class="sister-tag">Sister Vertical</span>
+      <nav class="mobile-nav-links" aria-label="Mobile links">
+        <a href="${resolveHref('index.html')}" class="${activePage === 'home' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.home}<span>Home</span></span>
         </a>
-        <a href="${resolveHref('about.html')}" class="${activePage === 'about' ? 'is-active' : ''}">About Us</a>
-        <a href="${resolveHref('contact.html')}" class="${activePage === 'contact' ? 'is-active' : ''}">Contact &amp; Location</a>
+        <a href="${resolveHref('shop.html')}" class="${activePage === 'shop' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.grid}<span>Medicine Catalogue</span></span>
+        </a>
+        <a href="${resolveHref('prescription.html')}" class="${activePage === 'prescription' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.upload}<span>Upload Prescription</span></span>
+        </a>
+        <a href="${clinicHref}"${clinicTargetAttr} class="mobile-nav-clinic ${activePage === 'clinic' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.stethoscope}<span>${escapeHtml(CONFIG.CLINIC_NAME)}</span></span>
+          <span class="sister-tag">Clinic</span>
+        </a>
+        <a href="${resolveHref('about.html')}" class="${activePage === 'about' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.info}<span>About Us</span></span>
+        </a>
+        <a href="${resolveHref('contact.html')}" class="${activePage === 'contact' ? 'is-active' : ''}">
+          <span class="mobile-nav-link-main">${ICONS.mapPin}<span>Contact &amp; Location</span></span>
+        </a>
       </nav>
+      <div class="mobile-drawer-section">
+        <div class="mobile-drawer-section-title">Popular Departments</div>
+        <div class="mobile-cat-chips">
+          <a class="mobile-cat-chip" href="${resolveHref('shop.html?category=Medicines')}">Medicines</a>
+          <a class="mobile-cat-chip" href="${resolveHref('shop.html?category=Diabetes%20Care')}">Diabetes Care</a>
+          <a class="mobile-cat-chip" href="${resolveHref('shop.html?category=Vitamins%20%26%20Nutrition')}">Vitamins</a>
+          <a class="mobile-cat-chip" href="${resolveHref('shop.html?category=Healthcare%20Devices')}">Health Devices</a>
+        </div>
+      </div>
       <div class="mobile-drawer-footer">
-        <div><strong>Store Timings:</strong> ${escapeHtml(CONFIG.STORE_TIMINGS)}</div>
-        <div><strong>Call / WhatsApp:</strong> <a href="${buildTelUrl()}">${CONFIG.PHONE_RAW}</a></div>
+        <div class="mobile-drawer-cta-row">
+          <a class="btn btn-whatsapp" href="${buildWhatsAppUrl(`Hello ${CONFIG.BRAND_NAME}, I would like to order medicines.`)}" target="_blank" rel="noopener noreferrer">${ICONS.whatsapp}<span>WhatsApp</span></a>
+          <a class="btn btn-secondary" href="${buildTelUrl()}">${ICONS.phone}<span>Call Store</span></a>
+        </div>
+        <div><strong>Timings:</strong> ${escapeHtml(CONFIG.STORE_TIMINGS)}</div>
         <div>${escapeHtml(CONFIG.ADDRESS)}</div>
       </div>
     </aside>
 
-    <nav class="mobile-bottom-bar" aria-label="Quick mobile actions">
-      <a class="mobile-bottom-item" href="${buildTelUrl()}">
-        ${ICONS.phone}
-        <span>Call</span>
+    <nav class="mobile-bottom-bar" aria-label="Quick mobile navigation">
+      <a class="mobile-bottom-item ${activePage === 'home' ? 'is-active' : ''}" href="${resolveHref('index.html')}">
+        <span class="mobile-bottom-icon">${ICONS.home}</span>
+        <span>Home</span>
+      </a>
+      <a class="mobile-bottom-item ${activePage === 'shop' || activePage === 'product' ? 'is-active' : ''}" href="${resolveHref('shop.html')}">
+        <span class="mobile-bottom-icon">${ICONS.pill}</span>
+        <span>Medicines</span>
+      </a>
+      <a class="mobile-bottom-item ${activePage === 'prescription' ? 'is-active' : ''}" href="${resolveHref('prescription.html')}">
+        <span class="mobile-bottom-icon">${ICONS.upload}</span>
+        <span>Upload Rx</span>
+      </a>
+      <a class="mobile-bottom-item mobile-bottom-item--clinic ${activePage === 'clinic' ? 'is-active' : ''}" href="${clinicHref}"${clinicTargetAttr}>
+        <span class="mobile-bottom-icon">${ICONS.stethoscope}</span>
+        <span>Consult Doc</span>
       </a>
       <a class="mobile-bottom-item mobile-bottom-item--whatsapp" href="${buildWhatsAppUrl('Hello Pharmawala Pharmacy, I need assistance with medicines.')}" target="_blank" rel="noopener noreferrer">
-        ${ICONS.whatsapp}
+        <span class="mobile-bottom-icon">${ICONS.whatsapp}</span>
         <span>WhatsApp</span>
-      </a>
-      <a class="mobile-bottom-item mobile-bottom-item--primary" href="${resolveHref('prescription.html')}">
-        ${ICONS.upload}
-        <span>Upload Rx</span>
       </a>
     </nav>
   `;
@@ -254,13 +293,27 @@ export function renderHeader(activePage = '') {
     if (!drawer || !backdrop || !openBtn) return;
     drawer.classList.toggle('is-open', open);
     backdrop.classList.toggle('is-open', open);
+    document.body.classList.toggle('is-drawer-open', open);
     drawer.setAttribute('aria-hidden', String(!open));
     openBtn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      closeBtn?.focus();
+    } else if (document.activeElement && drawer.contains(document.activeElement)) {
+      openBtn.focus();
+    }
   };
 
   openBtn?.addEventListener('click', () => setDrawer(true));
   closeBtn?.addEventListener('click', () => setDrawer(false));
   backdrop?.addEventListener('click', () => setDrawer(false));
+  drawer?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setDrawer(false));
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer?.classList.contains('is-open')) {
+      setDrawer(false);
+    }
+  });
 }
 
 export function populateMegaMenuCategories(products) {
@@ -490,67 +543,128 @@ export function initAccordions() {
   });
 }
 
-export function initCarousel(carouselId, { intervalMs = 5200, slideSelector = '[data-carousel-slide]' } = {}) {
+export function initCarousel(carouselId, { intervalMs = 4500, slideSelector = '[data-carousel-slide]' } = {}) {
   const root = document.getElementById(carouselId);
-  if (!root) return;
+  if (!root || root.dataset.carouselReady === '1') return;
   const track = root.querySelector('[data-carousel-track]');
   const slides = Array.from(root.querySelectorAll(slideSelector));
   const dots = Array.from(root.querySelectorAll('.carousel-dot'));
-  const prevBtn = root.querySelector('[data-carousel-prev]');
-  const nextBtn = root.querySelector('[data-carousel-next]');
+  const prevBtns = Array.from(root.querySelectorAll('[data-carousel-prev]'));
+  const nextBtns = Array.from(root.querySelectorAll('[data-carousel-next]'));
+  const toggleBtn = root.querySelector('[data-carousel-toggle]');
   const counterEl = root.querySelector('[data-carousel-counter]');
+  const progressEl = root.querySelector('[data-carousel-progress]');
   if (!track || slides.length <= 1) return;
+
+  root.dataset.carouselReady = '1';
+  root.style.setProperty('--carousel-interval', `${intervalMs}ms`);
 
   let index = 0;
   let timer = null;
+  let startedAt = 0;
+  let remainingMs = intervalMs;
+  let isUserPaused = false;
+  let isHovered = false;
+  let isFocused = false;
   let touchStartX = 0;
+  let touchStartY = 0;
+
+  const isEffectivelyPaused = () => isUserPaused || isHovered || isFocused || document.hidden;
+
+  const restartProgressAnimation = () => {
+    const animatedEls = [progressEl, ...dots.map((dot) => dot.querySelector('.carousel-dot-fill'))].filter(Boolean);
+    animatedEls.forEach((el) => {
+      el.classList.remove('is-running');
+    });
+    // Force reflow so the CSS progress bar restarts smoothly from 0% on slide change
+    void root.offsetWidth;
+    if (!isUserPaused) {
+      animatedEls.forEach((el) => {
+        el.classList.add('is-running');
+      });
+    }
+  };
+
+  const syncPlaybackState = () => {
+    const paused = isEffectivelyPaused();
+    root.classList.toggle('is-paused', paused);
+    root.classList.toggle('is-user-paused', isUserPaused);
+
+    if (toggleBtn) {
+      toggleBtn.setAttribute('aria-pressed', String(isUserPaused));
+      toggleBtn.setAttribute('aria-label', isUserPaused ? 'Play auto-slide' : 'Pause auto-slide');
+      toggleBtn.setAttribute('title', isUserPaused ? 'Play auto-slide' : 'Pause auto-slide');
+    }
+
+    if (paused) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+        remainingMs = Math.max(250, remainingMs - (Date.now() - startedAt));
+      }
+      return;
+    }
+
+    if (!timer) {
+      startedAt = Date.now();
+      timer = setTimeout(() => {
+        timer = null;
+        goTo(index + 1);
+      }, remainingMs);
+    }
+  };
 
   const goTo = (nextIdx) => {
     index = (nextIdx + slides.length) % slides.length;
     track.style.transform = `translateX(-${index * 100}%)`;
     slides.forEach((slide, i) => {
-      slide.classList.toggle('is-active', i === index);
-      slide.setAttribute('aria-hidden', String(i !== index));
+      const active = i === index;
+      slide.classList.toggle('is-active', active);
+      slide.setAttribute('aria-hidden', String(!active));
+      slide.inert = !active;
     });
     dots.forEach((dot, i) => dot.setAttribute('aria-selected', String(i === index)));
     if (counterEl) {
       counterEl.textContent = `${index + 1} / ${slides.length}`;
     }
+
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    remainingMs = intervalMs;
+    restartProgressAnimation();
+    syncPlaybackState();
   };
 
-  const startAuto = () => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    stopAuto();
-    timer = setInterval(() => goTo(index + 1), intervalMs);
-  };
-
-  const stopAuto = () => {
-    if (timer) clearInterval(timer);
-    timer = null;
-  };
-
-  prevBtn?.addEventListener('click', () => {
-    goTo(index - 1);
-    startAuto();
+  prevBtns.forEach((btn) => {
+    btn.addEventListener('click', () => goTo(index - 1));
   });
-  nextBtn?.addEventListener('click', () => {
-    goTo(index + 1);
-    startAuto();
+  nextBtns.forEach((btn) => {
+    btn.addEventListener('click', () => goTo(index + 1));
   });
   dots.forEach((dot, i) => {
-    dot.addEventListener('click', () => {
-      goTo(i);
-      startAuto();
-    });
+    dot.addEventListener('click', () => goTo(i));
+  });
+
+  toggleBtn?.addEventListener('click', () => {
+    isUserPaused = !isUserPaused;
+    if (!isUserPaused && remainingMs <= 250) {
+      remainingMs = intervalMs;
+      restartProgressAnimation();
+    } else if (!isUserPaused && progressEl && !progressEl.classList.contains('is-running')) {
+      restartProgressAnimation();
+    }
+    syncPlaybackState();
   });
 
   root.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') {
+      e.preventDefault();
       goTo(index - 1);
-      startAuto();
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
       goTo(index + 1);
-      startAuto();
     }
   });
 
@@ -558,7 +672,9 @@ export function initCarousel(carouselId, { intervalMs = 5200, slideSelector = '[
     'touchstart',
     (e) => {
       touchStartX = e.changedTouches[0]?.clientX ?? 0;
-      stopAuto();
+      touchStartY = e.changedTouches[0]?.clientY ?? 0;
+      isHovered = true;
+      syncPlaybackState();
     },
     { passive: true }
   );
@@ -567,20 +683,41 @@ export function initCarousel(carouselId, { intervalMs = 5200, slideSelector = '[
     'touchend',
     (e) => {
       const touchEndX = e.changedTouches[0]?.clientX ?? 0;
-      const diff = touchStartX - touchEndX;
-      if (Math.abs(diff) > 40) {
-        goTo(diff > 0 ? index + 1 : index - 1);
+      const touchEndY = e.changedTouches[0]?.clientY ?? 0;
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - touchEndY;
+      isHovered = false;
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        goTo(diffX > 0 ? index + 1 : index - 1);
+      } else {
+        syncPlaybackState();
       }
-      startAuto();
     },
     { passive: true }
   );
 
-  root.addEventListener('mouseenter', stopAuto);
-  root.addEventListener('mouseleave', startAuto);
-  root.addEventListener('focusin', stopAuto);
-  root.addEventListener('focusout', startAuto);
+  root.addEventListener('mouseenter', () => {
+    isHovered = true;
+    syncPlaybackState();
+  });
+  root.addEventListener('mouseleave', () => {
+    isHovered = false;
+    syncPlaybackState();
+  });
+  root.addEventListener('focusin', (e) => {
+    // Only pause for keyboard focus inside the slider, not mouse button clicks
+    if (e.target && e.target.matches(':focus-visible')) {
+      isFocused = true;
+      syncPlaybackState();
+    }
+  });
+  root.addEventListener('focusout', () => {
+    if (!root.contains(document.activeElement)) {
+      isFocused = false;
+      syncPlaybackState();
+    }
+  });
+  document.addEventListener('visibilitychange', syncPlaybackState);
 
   goTo(0);
-  startAuto();
 }
